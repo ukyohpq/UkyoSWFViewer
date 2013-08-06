@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="decompiler.tags.defineTags.AbstractDefineTag"/>
+    <classEntry path="decompiler.tags.controlTags.AbstractControlTag"/>
+    <classEntry path="decompiler.tags.ICanInDefineSpriteTag"/>
+    <classEntry path="decompiler.tags.controlTags.symbolClass.SymbolClassInternalTag"/>
+    <classEntry path="decompiler.tags.controlTags.defineSceneAndFrameLabelData.OffsetAndName"/>
+    <classEntry path="decompiler.core.SWFMatrix"/>
+    <classEntry path="decompiler.core.SWFColorTransform"/>
+    <classEntry path="decompiler.core.SWFClipActions"/>
+    <classEntry path="decompiler.utils.BitUtil"/>
+    <classEntry path="decompiler.tags.StopSoundTag"/>
+    <classEntry path="decompiler.core.SWFLanguageCode"/>
+    <classEntry path="decompiler.core.SWFShape"/>
+    <classEntry path="decompiler.core.shapeRecord.EndShapeRecord"/>
+    <classEntry path="decompiler.core.shapeRecord.ShapeRecords"/>
+    <classEntry path="decompiler.SWFFileType"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
