@@ -1,5 +1,6 @@
 package decompiler.tags.doabc.cpools.multinames
 {
+	import decompiler.tags.doabc.ABCFile;
 
 	/**
 	 * Multiname Kind 			Value
@@ -23,21 +24,21 @@ package decompiler.tags.doabc.cpools.multinames
 		{
 		}
 		
-		public static function factory(kind:int):SWFMultiname
+		public static function factory(kind:int, abcFile:ABCFile):SWFMultiname
 		{
 			switch(kind)
 			{
-				case MultinameKind.CONSTANT_Multiname: 		return new CMultiname;
-				case MultinameKind.CONSTANT_MultinameA: 	return new CMultinameA;
-				case MultinameKind.CONSTANT_MultinameL: 	return new CMultinameL;
-				case MultinameKind.CONSTANT_MultinameLA: 	return new CMultinameLA;
-				case MultinameKind.CONSTANT_QName: 			return new CQName;
-				case MultinameKind.CONSTANT_QNameA: 		return new CQNameA;
-				case MultinameKind.CONSTANT_RTQName: 		return new CRTQName;
-				case MultinameKind.CONSTANT_RTQNameA: 		return new CRTQNameA;
-				case MultinameKind.CONSTANT_RTQNameL: 		return new CRTQNameL;
-				case MultinameKind.CONSTANT_RTQNameLA: 		return new CRTQNameLA;
-				case MultinameKind.CONSTANT_GenericName: 	return new CGenericName;
+				case MultinameKind.CONSTANT_Multiname: 		return abcFile.elementFactory(CMultiname) as CMultiname;
+				case MultinameKind.CONSTANT_MultinameA: 	return abcFile.elementFactory(CMultinameA) as CMultinameA;
+				case MultinameKind.CONSTANT_MultinameL: 	return abcFile.elementFactory(CMultinameL) as CMultinameL;
+				case MultinameKind.CONSTANT_MultinameLA: 	return abcFile.elementFactory(CMultinameLA) as CMultinameLA;
+				case MultinameKind.CONSTANT_QName: 			return abcFile.elementFactory(CQName) as CQName;
+				case MultinameKind.CONSTANT_QNameA: 		return abcFile.elementFactory(CQNameA) as CQNameA;
+				case MultinameKind.CONSTANT_RTQName: 		return abcFile.elementFactory(CRTQName) as CRTQName;
+				case MultinameKind.CONSTANT_RTQNameA: 		return abcFile.elementFactory(CRTQNameA) as CRTQNameA;
+				case MultinameKind.CONSTANT_RTQNameL: 		return abcFile.elementFactory(CRTQNameL) as CRTQNameL;
+				case MultinameKind.CONSTANT_RTQNameLA: 		return abcFile.elementFactory(CRTQNameLA) as CRTQNameLA;
+				case MultinameKind.CONSTANT_GenericName: 	return abcFile.elementFactory(CGenericName) as CGenericName;
 				default:
 					throw new Error("wrong Multiname kind:" + kind);
 			}

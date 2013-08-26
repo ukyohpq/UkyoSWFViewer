@@ -3,19 +3,20 @@ package decompiler
 	import com.wirelust.as3zlib.JZlib;
 	import com.wirelust.as3zlib.ZStream;
 	
+	import decompiler.core.IToXMLable;
 	import decompiler.core.SWFRect;
 	import decompiler.tags.SWFTag;
 	import decompiler.tags.TagFactory;
 	import decompiler.tags.doabc.DoAbc2Tag;
 	import decompiler.tags.doabc.DoAbcTag;
 	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
-	import flash.net.FileReference;
 	import flash.utils.ByteArray;
 	import flash.utils.CompressionAlgorithm;
 	import flash.utils.Endian;
 
-	public class SWFFile
+	public class SWFFile implements IToXMLable
 	{
 		public var version:uint;
 		public var size:uint;
@@ -66,15 +67,12 @@ package decompiler
 					//在swf中是12~16,在LZMA中是 0~4
 					for (i = 0; i < 5; ++i) 
 					{
-						var n:int = fileByteArray[12 + i];
-						trace(n);
-						swfMainByteArray[i] = n;
+						swfMainByteArray[i] = fileByteArray[12 + i];
 					}
 					// calculate uncompressed length, subtract 8 (remove header bytes) 
 					//解压后长度，由于swf文件有文件头的8bytes，所以LZMA里要减去8
 					//长度在swf中是4~7,在LZMA中是5~12，所以要补上4bytes的0
 					var scriptlen:uint = (fileByteArray[4] | (fileByteArray[5] << 8 ) | (fileByteArray[6] << 16) | (fileByteArray[7] << 24)) - 8;
-					trace(scriptlen);
 					for (i = 0; i < 8; i++) 
 					{
 						if(i < 4)
@@ -106,7 +104,7 @@ package decompiler
 			//======================================================
 			frameRate = SWFUtil.readF16(fileByteArray);
 			numFrames = fileByteArray.readShort();//读取 总帧数
-			trace("swfType:",swfType,"swf_version:",version,"rect:",swfRect,"frameRate:",frameRate,"frameTota:",numFrames);
+//			trace("swfType:",swfType,"swf_version:",version,"rect:",swfRect,"frameRate:",frameRate,"frameTotal:",numFrames);
 			tagsArr = TagFactory.creatTags(fileByteArray);
 		}
 		
@@ -238,14 +236,36 @@ package decompiler
 		}
 		
 		public static function checkErr(z:ZStream, err:int, msg:String):Boolean {
-			if (err!=JZlib.Z_OK) {
+			if (err != JZlib.Z_OK) {
 				if (z.msg!=null) {
 					trace(z.msg + " ");
 				} 
-				trace(msg+" error: "+err);
+				trace(msg + " error: " + err);
 				return false;
 			}
 			return true;
 		}
+		
+		public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "SWF";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("version", version);
+			xml.setAttribute("size", size);
+			xml.setAttribute("frameRate", frameRate);
+			xml.setAttribute("numFrames", numFrames);
+			xml.appendChild(swfRect.toXML());
+			
+			var tags:SWFXML = new SWFXML("tags");
+			xml.appendChild(tags);
+			var length:int = tagsArr.length;
+			for (var i:int = 0; i < length; ++i) 
+			{
+				tags.appendChild(tagsArr[i].toXML());
+			}
+			
+			return xml;
+		}
+		
 	}
 }

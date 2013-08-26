@@ -1,14 +1,14 @@
 package decompiler.tags.doabc.method
 {
-	import decompiler.core.IByteArrayReader;
-	import decompiler.core.ISWFElement;
+	import decompiler.tags.doabc.ABCFileElement;
+	import decompiler.tags.doabc.IReferenceable;
+	import decompiler.tags.doabc.events.ABCFileEvent;
+	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	
-	import decompiler.tags.doabc.ABCFile;
-	
-	import decompiler.utils.SWFUtil;
+	import flash.utils.getQualifiedClassName;
 	
 	/**
 	 * option_detail
@@ -19,7 +19,7 @@ package decompiler.tags.doabc.method
 	 * @author ukyohpq
 	 * 
 	 */
-	public class MethodOptionDetail implements IByteArrayReader, ISWFElement
+	public class MethodOptionDetail extends ABCFileElement implements IReferenceable
 	{
 		private var _val:int;
 
@@ -30,7 +30,10 @@ package decompiler.tags.doabc.method
 
 		public function set val(value:int):void
 		{
+			modify();
+			$abcFile.removeReferenceByKindAndIndex(_kind, _val, this);
 			_val = value;
+			$abcFile.addReferenceByKindAndIndex(_kind, _val, this);
 		}
 
 		private var _kind:int;
@@ -42,7 +45,10 @@ package decompiler.tags.doabc.method
 
 		public function set kind(value:int):void
 		{
+			modify();
+			$abcFile.removeReferenceByKindAndIndex(_kind, _val, this);
 			_kind = value;
+			$abcFile.addReferenceByKindAndIndex(_kind, _val, this);
 		}
 
 		public function MethodOptionDetail(val:int = 0, kind:int = 0)
@@ -51,14 +57,28 @@ package decompiler.tags.doabc.method
 			_kind = kind;
 		}
 		
-		public function decodeFromBytes(byte:ByteArray):void
+		override public function decodeFromBytes(byte:ByteArray):void
 		{
 			_val = SWFUtil.readU30(byte);
 			_kind = byte.readUnsignedByte();
-			trace("MethodOptionDetail: " + ABCFile.getInstance().getValueByKindAndIndex(_kind, _val));
+			
+			include "../IReferenced_Fragment_1.as";
+		}
+
+		private function onParseComplete(event:ABCFileEvent):void
+		{
+			$abcFile.addReferenceByKindAndIndex(_kind, _val, this);
 		}
 		
-		public function encode():ByteArray
+		override public function toXML(name:String = null):SWFXML
+		{
+			var xml:SWFXML = new SWFXML("MethodOptionDetail");
+			xml.setAttribute("val", _val);
+			xml.setAttribute("kind", _kind);
+			return xml;
+		}
+		
+		override public function encode():ByteArray
 		{
 			var byte:ByteArray =  new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
@@ -66,5 +86,12 @@ package decompiler.tags.doabc.method
 			byte.writeByte(_kind);
 			return byte;
 		}
+		
+		public function creatRefrenceRelationship():void
+		{
+			// TODO Auto Generated method stub
+			
+		}
+		
 	}
 }

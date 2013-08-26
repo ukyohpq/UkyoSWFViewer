@@ -3,14 +3,16 @@ package decompiler.tags.controlTags.defineSceneAndFrameLabelData
 	import decompiler.core.IByteArrayReader;
 	import decompiler.core.ISWFElement;
 	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
-	public class OffsetAndName implements IByteArrayReader, ISWFElement
+	final public class OffsetAndName implements IByteArrayReader, ISWFElement
 	{
 		private var _offset:uint;
 		private var _name:String;
+		private var _isModified:Boolean;
 		public function OffsetAndName()
 		{
 		}
@@ -34,5 +36,20 @@ package decompiler.tags.controlTags.defineSceneAndFrameLabelData
 		{
 			return "[ offset:" + _offset + " name:" + _name + " ]";
 		}
+		
+		public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "OffsetAndName";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("offset", _offset);
+			xml.setAttribute("name", _name);
+			return xml;
+		}
+		
+		public function get isModified():Boolean
+		{
+			return _isModified;
+		}
+		
 	}
 }

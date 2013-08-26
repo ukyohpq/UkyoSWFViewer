@@ -6,20 +6,20 @@ package decompiler.tags.displayListTag
 	import decompiler.tags.ICanInDefineSpriteTag;
 	import decompiler.tags.SWFTag;
 	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
-	import flash.geom.Matrix;
 	import flash.utils.ByteArray;
 	
 	public class PlaceObject2Tag extends SWFTag implements ICanInDefineSpriteTag
 	{
-		private var PlaceFlagHasClipActions:int;
-		private var PlaceFlagHasClipDepth:int;
-		private var PlaceFlagHasName:int;
-		private var PlaceFlagHasRatio:int;
-		private var PlaceFlagHasColorTransform:int;
-		private var PlaceFlagHasMatrix:int;
-		private var PlaceFlagHasCharacter:int;
-		private var PlaceFlagMove:int;
+		private var _PlaceFlagHasClipActions:int;
+		private var _PlaceFlagHasClipDepth:int;
+		private var _PlaceFlagHasName:int;
+		private var _PlaceFlagHasRatio:int;
+		private var _PlaceFlagHasColorTransform:int;
+		private var _PlaceFlagHasMatrix:int;
+		private var _PlaceFlagHasCharacter:int;
+		private var _PlaceFlagMove:int;
 		private var _depth:int;
 		private var _characterId:int = 1;
 		private var _matrix:SWFMatrix;
@@ -36,59 +36,106 @@ package decompiler.tags.displayListTag
 		override protected function realDecode():void
 		{
 			var flag:int = $data.readUnsignedByte();
-			PlaceFlagHasClipActions = flag >> 7;
-			PlaceFlagHasClipDepth = flag >> 6 & 1;
-			PlaceFlagHasName = flag >> 5 & 1;
-			PlaceFlagHasRatio = flag >> 4 & 1;
-			PlaceFlagHasColorTransform = flag >> 3 & 1;
-			PlaceFlagHasMatrix = flag >> 2 & 1;
-			PlaceFlagHasCharacter = flag >> 1 & 1;
-			PlaceFlagMove = flag & 1;
+			_PlaceFlagHasClipActions = flag >> 7;
+			_PlaceFlagHasClipDepth = flag >> 6 & 1;
+			_PlaceFlagHasName = flag >> 5 & 1;
+			_PlaceFlagHasRatio = flag >> 4 & 1;
+			_PlaceFlagHasColorTransform = flag >> 3 & 1;
+			_PlaceFlagHasMatrix = flag >> 2 & 1;
+			_PlaceFlagHasCharacter = flag >> 1 & 1;
+			_PlaceFlagMove = flag & 1;
 			
 			_depth = $data.readShort();
-			trace(preFix + "_depth:" + _depth);
-			if(PlaceFlagHasCharacter)
+//			trace("_depth:" + _depth);
+			if(_PlaceFlagHasCharacter)
 				_characterId = $data.readShort();
-			trace(preFix + "_characterId:" + _characterId);
+//			trace("_characterId:" + _characterId);
 			
-			if(PlaceFlagHasMatrix)
+			if(_PlaceFlagHasMatrix)
 			{
 				_matrix = new SWFMatrix;
 				_matrix.decodeFromBytes($data);
 			}
-			trace(preFix + "_matrix:" + _matrix);
+//			trace("_matrix:" + _matrix);
 			
-			if(PlaceFlagHasColorTransform)
+			if(_PlaceFlagHasColorTransform)
 			{
 				_colorTransform = new SWFColorTransform;
 				_colorTransform.decodeFromBytes($data);
 			}
-			trace(preFix + "_colorTransform:" + _colorTransform);
+//			trace("_colorTransform:" + _colorTransform);
 			
-			if(PlaceFlagHasRatio)
+			if(_PlaceFlagHasRatio)
 			{
 				_ratio = $data.readShort();
 			}
-			trace(preFix + "_ratio:" + _ratio);
+//			trace("_ratio:" + _ratio);
 			
-			if(PlaceFlagHasName)
+			if(_PlaceFlagHasName)
 			{
 				_name = SWFUtil.readString($data);
 			}
-			trace(preFix + "_name:" + _name);
+//			trace("_name:" + _name);
 			
-			if(PlaceFlagHasClipDepth)
+			if(_PlaceFlagHasClipDepth)
 			{
 				_clipDepth = $data.readShort();
 			}
-			trace(preFix + "_clipDepth:" + _clipDepth);
+//			trace("_clipDepth:" + _clipDepth);
 			
-			if(PlaceFlagHasClipActions)
+			if(_PlaceFlagHasClipActions)
 			{
 				_clipActions = new SWFClipActions;
 				_clipActions.decodeFromBytes($data);
 			}
-			trace(preFix + "_clipActions:" + _clipActions);
+//			trace("_clipActions:" + _clipActions);
+		}
+		
+		override protected function contentToXML(xml:SWFXML):void
+		{
+			xml.appendChild("<PlaceFlagHasClipActions>" + _PlaceFlagHasClipActions + "</PlaceFlagHasClipActions>");
+			xml.appendChild("<PlaceFlagHasClipDepth>" + _PlaceFlagHasClipDepth + "</PlaceFlagHasClipDepth>");
+			xml.appendChild("<PlaceFlagHasName>" + _PlaceFlagHasName + "</PlaceFlagHasName>");
+			xml.appendChild("<PlaceFlagHasRatio>" + _PlaceFlagHasRatio + "</PlaceFlagHasRatio>");
+			xml.appendChild("<PlaceFlagHasColorTransform>" + _PlaceFlagHasColorTransform + "</PlaceFlagHasColorTransform>");
+			xml.appendChild("<PlaceFlagHasMatrix>" + _PlaceFlagHasMatrix + "</PlaceFlagHasMatrix>");
+			xml.appendChild("<PlaceFlagHasCharacter>" + _PlaceFlagHasCharacter + "</PlaceFlagHasCharacter>");
+			xml.appendChild("<PlaceFlagMove>" + _PlaceFlagMove + "</PlaceFlagMove>");
+			xml.appendChild("<_depth>" + _depth + "</_depth>");
+			if(_PlaceFlagHasCharacter)
+			{
+				xml.appendChild("<characterId value=\"" + _characterId + "\"/>");
+			}
+			
+			if(_PlaceFlagHasMatrix)
+			{
+				xml.appendChild(_matrix.toXML());
+			}
+			
+			if(_PlaceFlagHasColorTransform)
+			{
+				xml.appendChild(_colorTransform.toXML());
+			}
+			
+			if(_PlaceFlagHasRatio)
+			{
+				xml.appendChild(<ratio value={_ratio}/>);
+			}
+			
+			if(_PlaceFlagHasName)
+			{
+				xml.appendChild(<name value={_name}/>);
+			}
+			
+			if(_PlaceFlagHasClipDepth)
+			{
+				xml.appendChild(<clipDepth value={_clipDepth}/>);
+			}
+			
+			if(_PlaceFlagHasClipActions)
+			{
+				xml.appendChild(_clipActions.toXML());
+			}
 		}
 		
 		

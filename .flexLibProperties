@@ -16,6 +16,15 @@
     <classEntry path="decompiler.core.shapeRecord.EndShapeRecord"/>
     <classEntry path="decompiler.core.shapeRecord.ShapeRecords"/>
     <classEntry path="decompiler.SWFFileType"/>
+    <classEntry path="decompiler.tags.doabc.ABCFileElement"/>
+    <classEntry path="decompiler.core.IToXMLable"/>
+    <classEntry path="decompiler.tags.doabc.cpools.CNameSpace_0"/>
+    <classEntry path="decompiler.tags.doabc.cpools.CString_0"/>
+    <classEntry path="encrypt.Encrypter"/>
+    <classEntry path="decompiler.core.ICanModify"/>
+    <classEntry path="decompiler.tags.doabc.cpools.Cint"/>
+    <classEntry path="decompiler.tags.doabc.cpools.Cuint"/>
+    <classEntry path="decompiler.tags.doabc.cpools.CDouble"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -7,9 +7,21 @@ package decompiler.tags.defineTags
 	public class AbstractDefineTag extends SWFTag
 	{
 		protected var $charactorID:int;
-		public function AbstractDefineTag(id:int, data:ByteArray, preFix:String="")
+
+		public function get charactorID():int
 		{
-			super(id, data, preFix);
+			return $charactorID;
+		}
+
+		public function set charactorID(value:int):void
+		{
+			$isModified = true;
+			$charactorID = value;
+		}
+
+		public function AbstractDefineTag(id:int, data:ByteArray)
+		{
+			super(id, data);
 		}
 	}
 }

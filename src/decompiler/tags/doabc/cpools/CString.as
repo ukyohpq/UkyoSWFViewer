@@ -1,11 +1,10 @@
 package decompiler.tags.doabc.cpools
 {
-	import decompiler.core.IByteArrayReader;
-	import decompiler.core.ISWFElement;
+	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
-	
-	import decompiler.utils.SWFUtil;
 	
 	/**
 	 * string_info
@@ -16,7 +15,7 @@ package decompiler.tags.doabc.cpools
 	 * @author ukyohpq
 	 * 
 	 */
-	public class CString implements IByteArrayReader, ISWFElement
+	public class CString extends ReferencedElement
 	{
 		private var _str:String;
 
@@ -27,6 +26,7 @@ package decompiler.tags.doabc.cpools
 
 		public function set str(value:String):void
 		{
+			modify();
 			_str = value;
 		}
 
@@ -35,7 +35,7 @@ package decompiler.tags.doabc.cpools
 			_str = str;
 		}
 		
-		public function encode():ByteArray
+		override public function encode():ByteArray
 		{
 			var byte:ByteArray = new ByteArray;
 			var str:ByteArray = new ByteArray;
@@ -46,7 +46,7 @@ package decompiler.tags.doabc.cpools
 			return byte;
 		}
 		
-		public function decodeFromBytes(byte:ByteArray):void
+		override public function decodeFromBytes(byte:ByteArray):void
 		{
 			_str = byte.readUTFBytes(SWFUtil.readU30(byte));
 		}
@@ -55,5 +55,27 @@ package decompiler.tags.doabc.cpools
 		{
 			return _str;
 		}
+		
+		override public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "str";
+			var xml:SWFXML = new SWFXML(name);
+			//检测_str是否具有xml干扰
+			if(_str.indexOf("<") != -1 || _str.indexOf(">") != -1)
+			{
+				//检查_str是否具有<![CDATA[]]>干扰
+				if(_str.indexOf("<![CDATA[") != -1 || _str.indexOf("]]>") != -1)
+				{
+					_str = encodeURIComponent(_str);
+				}else{
+					_str = "<![CDATA[" + _str + "]]>";
+				}
+				xml.setAttribute("illegal", true);
+			}
+			xml.appendChild(_str);
+			
+			return xml;
+		}
+		
 	}
 }

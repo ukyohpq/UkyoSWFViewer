@@ -8,7 +8,7 @@ package decompiler.core
 	 * @author ukyohpq
 	 * 
 	 */
-	public interface ISWFElement
+	public interface ISWFElement extends IToXMLable
 	{
 		function encode():ByteArray;
 	}

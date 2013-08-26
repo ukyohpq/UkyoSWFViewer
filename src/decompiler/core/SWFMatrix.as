@@ -2,18 +2,26 @@ package decompiler.core
 {
 	import decompiler.utils.BitArray;
 	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 
-	public class SWFMatrix implements ISWFElement, IByteArrayReader
+	final public class SWFMatrix implements ISWFElement, IByteArrayReader
 	{
 		//这里的_scalex和_scaleY其实并不是一个比值，而是一个最终的宽高
-		private var _scaleX:Number;
-		private var _scaleY:Number;
-		private var _rotateSkew0:Number;
-		private var _rotateSkew1:Number;
-		private var _translateX:Number;
-		private var _translateY:Number;
+		private var _scaleX:Number = 0;
+		private var _scaleY:Number = 0;
+		
+		public function get isModified():Boolean
+		{
+			return _isModified;
+		}
+		
+		private var _rotateSkew0:Number = 0;
+		private var _rotateSkew1:Number = 0;
+		private var _translateX:Number = 0;
+		private var _translateY:Number = 0;
+		private var _isModified:Boolean;
 		public function SWFMatrix()
 		{
 		}
@@ -41,8 +49,8 @@ package decompiler.core
 				_scaleX = bitArr.read32FBByLength(nScaleBits);
 				_scaleY = bitArr.read32FBByLength(nScaleBits);
 			}
-			trace("_scaleX:" + _scaleX);
-			trace("_scaleY:" + _scaleY);
+//			trace("_scaleX:" + _scaleX);
+//			trace("_scaleY:" + _scaleY);
 			
 			//记录下当前已解析的部分的长度，在检测写入多少byte才能足够读取出下一个变长数据时
 			//(类似上面的bitArr.length < _nScaleBits * 2 + (1 + 5)有用，
@@ -90,8 +98,8 @@ package decompiler.core
 				_rotateSkew0 = bitArr.read32FBByLength(nRotateBits);
 				_rotateSkew1 = bitArr.read32FBByLength(nRotateBits);
 			}
-			trace("_rotateSkew0:" + _rotateSkew0);
-			trace("_rotateSkew1:" + _rotateSkew1);
+//			trace("_rotateSkew0:" + _rotateSkew0);
+//			trace("_rotateSkew1:" + _rotateSkew1);
 			
 			currentLength = bitArr.position;
 			if(bitArr.bitsAvailable < 5)
@@ -110,9 +118,23 @@ package decompiler.core
 			_translateX = bitArr.readInt(nTranslateBits);
 			_translateY = bitArr.readInt(nTranslateBits);
 			
-			trace("_translateX:" + _translateX);
-			trace("_translateY:" + _translateY);
+//			trace("_translateX:" + _translateX);
+//			trace("_translateY:" + _translateY);
 		}
+		
+		public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "Matrix";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("scaleX", _scaleX);
+			xml.setAttribute("scaleY", _scaleY);
+			xml.setAttribute("rotateSkew0", _rotateSkew0);
+			xml.setAttribute("rotateSkew1", _rotateSkew1);
+			xml.setAttribute("translateX", _translateX);
+			xml.setAttribute("translateY", _translateY);
+			return xml;
+		}
+		
 		
 		//尚未测试
 		public function encode():ByteArray

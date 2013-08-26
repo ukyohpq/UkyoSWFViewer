@@ -116,11 +116,15 @@ package decompiler.tags
 				if(parent)
 				{
 					swfTag.parentTag = parent;
-					swfTag.preFix = parent.preFix + "\t";
 				}
 				vec.push(swfTag);
 			}
 			return vec;
+		}
+		
+		public static function creatEmptyTag(tagID:int):SWFTag
+		{
+			return new (getTagClassByID(tagID) as Class)(tagID, new ByteArray);
 		}
 		
 		internal static function getTagClassByID(tagID:int):Class

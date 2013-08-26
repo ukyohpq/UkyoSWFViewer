@@ -121,18 +121,19 @@ package decompiler.utils
 			//每次处理7bit，直到将n的所有bit都处理完
 			//如果n还有剩余bit, 就在这7bit前加一个1，组成一个byte
 			var numBytes:uint = 0;
-			while(n)
+			var m:uint = uint(n);
+			while(m)
 			{
-				if(n > 127)
+				if(m > 127)
 				{
 					//(128 | (n & 127))
 					//翻译一下就是(1000 0000 | (n & 0111 1111))
 					//即是在n的末7bit前加一个1组成一个byte
-					byteArray.writeByte(128 | (n & 127));
-					n >>= 7;
+					byteArray.writeByte(128 | (m & 127));
+					m >>>= 7;
 				}else{
-					byteArray.writeByte(n);
-					n = 0;
+					byteArray.writeByte(m);
+					m = 0;
 				}
 				numBytes++;
 			}

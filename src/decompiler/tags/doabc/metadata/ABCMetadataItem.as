@@ -1,12 +1,13 @@
 package decompiler.tags.doabc.metadata
 {
-	import decompiler.core.IByteArrayReader;
-	import decompiler.core.ISWFElement;
+	import decompiler.tags.doabc.ABCFileElement;
+	import decompiler.tags.doabc.IReferenceable;
+	import decompiler.tags.doabc.Reference;
+	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	
-	import decompiler.utils.SWFUtil;
 	
 	/**
 	 * 	item_info
@@ -14,10 +15,12 @@ package decompiler.tags.doabc.metadata
 			u30 key
 			u30 value
 		}
+		 * The item_info entry consists of item_count elements that are interpreted as key/value pairs of indices into the
+string table of the constant pool. If the value of key is zero, this is a keyless entry and only carries a value.
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ABCMetadataItem implements ISWFElement, IByteArrayReader
+	public class ABCMetadataItem extends ABCFileElement implements IReferenceable
 	{
 		private var _key:int;
 
@@ -28,7 +31,10 @@ package decompiler.tags.doabc.metadata
 
 		public function set key(value:int):void
 		{
+			modify();
+			$abcFile.getStringByIndex(_key).removeReference(this, "key");
 			_key = value;
+			$abcFile.getStringByIndex(_key).addReference(this, "key");
 		}
 
 		private var _value:int;
@@ -40,7 +46,10 @@ package decompiler.tags.doabc.metadata
 
 		public function set value(value:int):void
 		{
+			modify();
+			$abcFile.getStringByIndex(_value).removeReference(this, "value");
 			_value = value;
+			$abcFile.getStringByIndex(_value).addReference(this, "value");
 		}
 
 		public function ABCMetadataItem(key:int = 0, value:int = 0)
@@ -49,7 +58,7 @@ package decompiler.tags.doabc.metadata
 			_value = value;
 		}
 		
-		public function encode():ByteArray
+		override public function encode():ByteArray
 		{
 			var byte:ByteArray = new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
@@ -58,10 +67,29 @@ package decompiler.tags.doabc.metadata
 			return byte;
 		}
 		
-		public function decodeFromBytes(byte:ByteArray):void
+		override public function decodeFromBytes(byte:ByteArray):void
 		{
 			_key = SWFUtil.readU30(byte);
 			_value = SWFUtil.readU30(byte);
+			
+			include "../IReferenced_Fragment_1.as";
 		}
+		
+		public function creatRefrenceRelationship():void
+		{
+			$abcFile.getStringByIndex(_key).addReference(this, "key");
+			$abcFile.getStringByIndex(_value).addReference(this, "value");
+		}
+		
+		override public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "item";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("key", _key);
+			xml.setAttribute("value", _value);
+			return xml;
+		}
+		
+		
 	}
 }

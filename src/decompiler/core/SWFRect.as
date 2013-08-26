@@ -1,10 +1,11 @@
 package decompiler.core
 {
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
-	
 	import decompiler.utils.BitArray;
 	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 
 	public final class SWFRect implements ISWFElement, IByteArrayReader
 	{
@@ -82,6 +83,7 @@ package decompiler.core
 		 * 存矩形4元素的数组
 		 */
 		private var _rectVec:Vector.<uint>;
+		private var _isModified:Boolean;
 		
 		/**
 		 * swf文件中的矩形类，分别由元素长度，minX, maxX, minY, maxY表示，其中，元素长度是四个数值中最大值的bit长度+1
@@ -203,5 +205,22 @@ package decompiler.core
 			str += "maxY:" + maxY + " ]";
 			return str;
 		}
+		
+		public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "rect";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("minX", minX);
+			xml.setAttribute("minY", minY);
+			xml.setAttribute("maxX", maxX);
+			xml.setAttribute("maxY", maxY);
+			return xml;
+		}
+		
+		public function get isModified():Boolean
+		{
+			return _isModified;
+		}
+		
 	}
 }

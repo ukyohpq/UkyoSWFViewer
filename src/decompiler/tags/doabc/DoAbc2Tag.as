@@ -4,6 +4,7 @@ package decompiler.tags.doabc
 	import decompiler.tags.SWFTag;
 	import decompiler.tags.TagType;
 	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
@@ -24,36 +25,60 @@ package decompiler.tags.doabc
 	 */
 	public final class DoAbc2Tag extends SWFTag implements ICanInDefineSpriteTag
 	{
-		public var flag:int;
-		public var name:String;
-		private var _abcData:ABCFile;
-		private var _head:ByteArray;
-		private var _CpoolBytes:ByteArray;
+		private var _flag:int;
+
+		public function get flag():int
+		{
+			return _flag;
+		}
+
+		private var _name:String;
+
+		public function get name():String
+		{
+			return _name;
+		}
+
+		private var _abcFile:ABCFile;
+
+		public function get abcFile():ABCFile
+		{
+			return _abcFile;
+		}
+
 		public function DoAbc2Tag(id:int, body:ByteArray)
 		{
 			super(TagType.DO_ABC_2, body);
+			_abcFile = new ABCFile;
 		}
 		
 		override protected function realDecode():void
 		{
-			//read flag
-			flag = $data.readInt();
-			trace(preFix + "flag:", flag, $data.position);
+			_flag = $data.readInt();
+//			trace("flag:", flag, $data.position);
 			
-			//read name
-			//读一个字符串，遇到0就结束
-			//貌似直接用readUTF会报文件尾错误
-			name = SWFUtil.readString($data);
-//			trace(preFix + "name:" + name);
-			//读出name后，再读一个byte，这个byte一定是0，因为我们就是读到这个0才确定的name长度
-			//文档中没有提，我自己给它起个字段叫afterName
-//			$data.readByte();
-			var abcByte:ByteArray = new ByteArray;
-			abcByte.endian = Endian.LITTLE_ENDIAN;
-			$data.readBytes(abcByte);
-			_abcData = ABCFile.getInstance();
-			_abcData.decodeFromBytes(abcByte);
-			
+			_name = SWFUtil.readString($data);
+			_abcFile.decodeFromBytes($data);
 		}
+		
+		override protected function encodeData():void
+		{
+			$data.writeInt(_flag);
+			SWFUtil.writeString($data, _name);
+			$data.writeBytes(_abcFile.encode());
+		}
+		
+		override protected function contentToXML(xml:SWFXML):void
+		{
+			xml.appendChild("<flag>" + _flag + "</flag>");
+			xml.appendChild("<name>" + _name + "</name>");
+			xml.appendChild(_abcFile.toXML());
+		}
+		
+		override public function get isModified():Boolean
+		{
+			return _abcFile.isModified;
+		}
+		
 	}
 }

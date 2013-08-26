@@ -1,43 +1,58 @@
 package decompiler.tags
 {
-	import avmplus.getQualifiedClassName;
-	
+	import decompiler.core.ICanModify;
 	import decompiler.core.ISWFElement;
 	import decompiler.tags.defineTags.DefineSpriteTag;
+	import decompiler.tags.doabc.DoAbc2Tag;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 
-	public class SWFTag implements ISWFElement
+	public class SWFTag implements ISWFElement, ICanModify
 	{
 		public var parentTag:DefineSpriteTag;
 		protected var $id:uint;
+		protected var $isModified:Boolean;
+
+		/**
+		 * 该tag是否修改过，如果修改过，需要重新编译tag体，否则，不需要编译tag体
+		 */
+		public function get isModified():Boolean
+		{
+			return $isModified;
+		}
+
+		private var _xml:XML = <tag/>;
+		final public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "tag";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("name", tagName);
+			xml.setAttribute("id", id);
+			contentToXML(xml);
+			return xml;
+		}
+		
+		protected function contentToXML(xml:SWFXML):void
+		{
+			//empty
+		}
+		
 		protected var $data:ByteArray;
-		private var _preFix:String = "";
-
-		public function get preFix():String
-		{
-			return _preFix;
-		}
-
-		public function set preFix(value:String):void
-		{
-			_preFix = value;
-		}
 
 		public function get tagName():String
 		{
 			return TagType.getNameByID(id);
 		}
 
-		public function SWFTag(id:int, data:ByteArray, preFix:String = "")
+		public function SWFTag(id:int, data:ByteArray)
 		{
 			if(this["constructor"] == SWFTag)
 				throw new Error("抽象类不能实例化");
 			$id = id;
 			$data = data;
 			$data.endian = Endian.LITTLE_ENDIAN;
-			_preFix = preFix;
 		}
 		
 		public function get data():ByteArray
@@ -57,8 +72,12 @@ package decompiler.tags
 		 */
 		final public function encode():ByteArray
 		{
-//			$data.clear();
-//			encodeData();
+			//如果该tag修改过，则重新编译tag体
+			if(isModified)
+			{
+				$data.clear();
+				encodeData();
+			}
 			
 			var byte:ByteArray = new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
@@ -81,17 +100,6 @@ package decompiler.tags
 			return byte;
 		}
 		
-		/**
-		 * 修改data，并编码tag
-		 * 
-		 */
-		final public function overrideEncode():void
-		{
-			$data.clear();
-			encodeData();
-			encode();
-		}
-		
 		protected function encodeData():void
 		{
 			//todo
@@ -99,13 +107,13 @@ package decompiler.tags
 		
 		final public function decode():void
 		{
-			trace(_preFix + "===========[ " + tagName + " ]============");
-			try{
+//			try{
 				realDecode();
-			}catch(err:Error)
-			{
-				trace(_preFix + "tag parse err.");
-			}
+//			}catch(err:Error)
+//			{
+//				trace("tag parse err.");
+//				throw (err);
+//			}
 		}
 		
 		protected function realDecode():void
@@ -169,5 +177,6 @@ package decompiler.tags
 			
 			return str;
 		}
+		
 	}
 }

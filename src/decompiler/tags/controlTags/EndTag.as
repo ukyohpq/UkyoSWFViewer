@@ -24,9 +24,7 @@ package decompiler.tags.controlTags
 		override protected function encodeData():void
 		{
 			$data.writeByte(0);
-			super.encodeData();
 		}
-		
 		
 	}
 }

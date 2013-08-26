@@ -1,11 +1,12 @@
 package decompiler.tags.defineTags
 {
+	import decompiler.utils.SWFXML;
+	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
 	public class DefineBinaryDataTag extends AbstractDefineTag
 	{
-		private var _characterID:int;
 		private var _binaData:ByteArray;
 		public function DefineBinaryDataTag(id:int, data:ByteArray)
 		{
@@ -15,23 +16,30 @@ package decompiler.tags.defineTags
 		override protected function encodeData():void
 		{
 			super.encodeData();
-			$data.writeShort(_characterID);
+			$data.writeShort($charactorID);
 			$data.writeInt(0);
 			$data.writeBytes(_binaData);
 		}
 		
 		override protected function realDecode():void
 		{
-			_characterID = $data.readShort();
+			$charactorID = $data.readShort();
 			$data.readInt();//Reserved, must be 0
 			_binaData = new ByteArray;
 			$data.readBytes(_binaData);
-			trace("[ DefineBinaryData characterID:" + _characterID + " ]");
+//			trace("[ DefineBinaryData characterID:" + $characterID + " ]");
 		}
 		
-		override public function toString():String
+		override protected function contentToXML(xml:SWFXML):void
 		{
-			return "[ DefineBinaryData characterID:" + _characterID + " ]";
+			xml.appendChild("<characterID>" + $charactorID + "</characterID>");
+			xml.appendChild("<length>" + _binaData.length + "</length>");
 		}
+		
+		
+//		override public function toString():String
+//		{
+//			return "[ DefineBinaryData characterID:" + $characterID + " ]";
+//		}
 	}
 }

@@ -1,11 +1,11 @@
 package decompiler.tags.doabc.cpools.multinames
 {
+	import decompiler.tags.doabc.Reference;
+	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
+	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	
-	import decompiler.tags.doabc.ABCFile;
-	
-	import decompiler.utils.SWFUtil;
 
 	/**
 	 * multiname_kind_RTQName
@@ -33,7 +33,10 @@ package decompiler.tags.doabc.cpools.multinames
 
 		public function set name(value:int):void
 		{
+			modify();
+			$abcFile.getStringByIndex(_name).removeReference(this, "name");
 			_name = value;
+			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
 
 		public function CRTQName(name:int = 0)
@@ -44,7 +47,7 @@ package decompiler.tags.doabc.cpools.multinames
 		
 		override public function decodeFromBytes(byte:ByteArray):void
 		{
-			// TODO Auto Generated method stub
+			_name = SWFUtil.readU30(byte);
 			super.decodeFromBytes(byte);
 		}
 		
@@ -58,7 +61,17 @@ package decompiler.tags.doabc.cpools.multinames
 		
 		override public function toString():String
 		{
-			return "[ CRTQName name:" + ABCFile.getInstance().getStringByIndex(_name) + " ]";
+			return "[ CRTQName name:" + $abcFile.getStringByIndex(_name) + " ]";
+		}
+		
+		override protected function contentToXML(xml:SWFXML):void
+		{
+			xml.appendChild("<name>" + $abcFile.getStringByIndex(_name) + " str(" + _name + ")" + "</name>");
+		}
+		
+		override public function creatRefrenceRelationship():void
+		{
+			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
 	}
 }

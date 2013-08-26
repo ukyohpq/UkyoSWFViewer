@@ -1,14 +1,14 @@
 package decompiler.tags.doabc.script
 {
-	import decompiler.core.IByteArrayReader;
-	import decompiler.core.ISWFElement;
+	import decompiler.tags.doabc.ABCFileElement;
+	import decompiler.tags.doabc.IReferenceable;
+	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.trait.TraitsInfo;
+	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	
-	import decompiler.core.trait.TraitsInfo;
-	
-	import decompiler.utils.SWFUtil;
 	
 	/**
 	 * The script_info entry is used to define characteristics of an ActionScript 3.0 script
@@ -21,13 +21,30 @@ package decompiler.tags.doabc.script
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ScriptInfo implements IByteArrayReader, ISWFElement
+	public class ScriptInfo extends ABCFileElement implements IReferenceable
 	{
+		private var _init:int;
+
 		/**
 		 * The init field is an index into the method array of the abcFile. 
 		 * It identifies a function that is to be invoked prior to any other code in this script.
 		 */
-		private var _init:int;
+		public function get init():int
+		{
+			return _init;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set init(value:int):void
+		{
+			modify();
+			$abcFile.getMethodInfoByIndex(_init).removeReference(this, "init");
+			_init = value;
+			$abcFile.getMethodInfoByIndex(_init).addReference(this, "init");
+		}
+
 		/**
 		 * The value of trait_count is the number of entries in the trait array. 
 		 * The trait array is the set of traits defined by the script.
@@ -37,7 +54,7 @@ package decompiler.tags.doabc.script
 		{
 		}
 		
-		public function decodeFromBytes(byte:ByteArray):void
+		override public function decodeFromBytes(byte:ByteArray):void
 		{
 			//read init
 			_init = SWFUtil.readU30(byte);
@@ -47,13 +64,15 @@ package decompiler.tags.doabc.script
 			_traitsArray = new Vector.<TraitsInfo>(length);
 			for (var i:int = 0; i < length; ++i) 
 			{
-				var traitInfo:TraitsInfo = new TraitsInfo;
+				var traitInfo:TraitsInfo = $abcFile.elementFactory(TraitsInfo) as TraitsInfo;
 				traitInfo.decodeFromBytes(byte);
 				_traitsArray[i] = traitInfo;
 			}
+			
+			include "../IReferenced_Fragment_1.as";
 		}
 		
-		public function encode():ByteArray
+		override public function encode():ByteArray
 		{
 			var byte:ByteArray = new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
@@ -74,5 +93,27 @@ package decompiler.tags.doabc.script
 			
 			return byte;
 		}
+		
+		override public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "scriptInfo";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("init", "md(" + _init + ")");
+			var length:int = _traitsArray.length;
+			var traits:SWFXML = new SWFXML("traits");
+			xml.appendChild(traits);
+			for (var i:int = 0; i < length; ++i) 
+			{
+				traits.appendChild(_traitsArray[i].toXML("trait_" + i));
+			}
+			
+			return xml;
+		}
+		
+		public function creatRefrenceRelationship():void
+		{
+			$abcFile.getMethodInfoByIndex(_init).addReference(this, "init");
+		}
+		
 	}
 }

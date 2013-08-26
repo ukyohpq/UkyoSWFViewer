@@ -1,7 +1,7 @@
 package decompiler.tags.displayListTag
 {
-	import decompiler.tags.SWFTag;
 	import decompiler.tags.ICanInDefineSpriteTag;
+	import decompiler.tags.SWFTag;
 	
 	import flash.utils.ByteArray;
 	

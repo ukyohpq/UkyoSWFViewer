@@ -7,7 +7,6 @@ package decompiler.tags.defineTags
 	
 	public class DefineFont3Tag extends AbstractDefineTag
 	{
-
 		private var _lcd:SWFLanguageCode;
 		private var _fontFlagsHasLayout:int;
 		private var _fontFlagsShiftJIS:int;
@@ -39,7 +38,7 @@ package decompiler.tags.defineTags
 		override protected function realDecode():void
 		{
 			return;
-			$charactorID = $data.readUnsignedShort();
+			charactorID = $data.readUnsignedShort();
 			var flag:BitArray = new BitArray;
 			flag.writeByte($data.readUnsignedByte());
 			flag.position = 0;

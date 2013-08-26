@@ -2,11 +2,13 @@ package decompiler.tags.doabc.methodBody
 {
 	import decompiler.core.IByteArrayReader;
 	import decompiler.core.ISWFElement;
+	import decompiler.tags.doabc.ABCFileElement;
+	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	
-	import decompiler.utils.SWFUtil;
 	
 	/**
 	 * The exception_info entry is used to define the range of 
@@ -22,12 +24,14 @@ package decompiler.tags.doabc.methodBody
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ExceptionInfo implements IByteArrayReader, ISWFElement
+	public class ExceptionInfo extends ReferencedElement
 	{
 		/**
 		 * The starting position in the code field from which the exception is enabled
 		 */
 		private var _from:uint;
+		
+		
 		/**
 		 * The ending position in the code field after which the exception is disabled
 		 */
@@ -57,7 +61,7 @@ package decompiler.tags.doabc.methodBody
 		{
 		}
 		
-		public function decodeFromBytes(byte:ByteArray):void
+		override public function decodeFromBytes(byte:ByteArray):void
 		{
 			//read from
 			_from = SWFUtil.readU30(byte);
@@ -71,7 +75,7 @@ package decompiler.tags.doabc.methodBody
 			_varName = SWFUtil.readU30(byte);
 		}
 		
-		public function encode():ByteArray
+		override public function encode():ByteArray
 		{
 			var byte:ByteArray = new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
@@ -86,6 +90,18 @@ package decompiler.tags.doabc.methodBody
 			//write varName
 			SWFUtil.writeU30(byte, _varName);
 			return byte;
+		}
+		
+		override public function toXML(name:String = null):SWFXML
+		{
+			if(!name) name = "exception";
+			var xml:SWFXML = new SWFXML(name);
+			xml.setAttribute("from", _from);
+			xml.setAttribute("to", _to);
+			xml.setAttribute("target", _target);
+			xml.setAttribute("excType", "mn(" + _excType + ")");
+			xml.setAttribute("varName", "mn(" + _varName + ")");
+			return xml;
 		}
 	}
 }

@@ -4,9 +4,9 @@ package decompiler.tags
 	
 	public class StopSoundTag extends SWFTag
 	{
-		public function StopSoundTag(id:int, data:ByteArray, preFix:String="")
+		public function StopSoundTag(id:int, data:ByteArray)
 		{
-			super(id, data, preFix);
+			super(id, data);
 		}
 	}
 }

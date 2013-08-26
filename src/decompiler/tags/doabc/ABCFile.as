@@ -1,22 +1,27 @@
 package decompiler.tags.doabc
 {
 	import decompiler.core.IByteArrayReader;
+	import decompiler.core.ICanModify;
 	import decompiler.core.ISWFElement;
-	import decompiler.core.trait.TraitsInfo;
-	import decompiler.tags.doabc.classAndInstances.CClass;
-	import decompiler.tags.doabc.classAndInstances.CInstance;
-	import decompiler.tags.doabc.cpools.CNameSpace;
+	import decompiler.tags.doabc.classAndInstances.ClassInfo;
+	import decompiler.tags.doabc.classAndInstances.InstanceInfo;
+	import decompiler.tags.doabc.cpools.CDouble;
+	import decompiler.tags.doabc.cpools.namespaces.CNameSpace;
 	import decompiler.tags.doabc.cpools.CNsSet;
 	import decompiler.tags.doabc.cpools.CString;
+	import decompiler.tags.doabc.cpools.Cint;
 	import decompiler.tags.doabc.cpools.Cpool_info;
+	import decompiler.tags.doabc.cpools.Cuint;
 	import decompiler.tags.doabc.cpools.multinames.SWFMultiname;
+	import decompiler.tags.doabc.events.ABCFileEvent;
 	import decompiler.tags.doabc.metadata.ABCMetadata;
 	import decompiler.tags.doabc.method.MethodInfo;
-	import decompiler.tags.doabc.methodBody.ExceptionInfo;
 	import decompiler.tags.doabc.methodBody.MethodBody;
 	import decompiler.tags.doabc.script.ScriptInfo;
 	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
 	
+	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 
@@ -41,7 +46,8 @@ package decompiler.tags.doabc
 	 * @author ukyohpq
 	 * 
 	 */
-	public final class ABCFile implements ISWFElement, IByteArrayReader
+	[Event(name="parseComplete", type="decompiler.tags.doabc.events.ABCFileEvent")]
+	public final class ABCFile extends EventDispatcher implements ISWFElement, IByteArrayReader, ICanModify
 	{
 		/**
 		 * The values of major_version and minor_version are the major 
@@ -55,8 +61,8 @@ package decompiler.tags.doabc
 		 * As of the publication of this overview, 
 		 * the major version is 46 and the minor version is 16.
 		 */
-		public var minor_version:uint;
-		public var major_version:uint;
+		private var minor_version:uint;
+		private var major_version:uint;
 		
 		/**
 		 * The constant_pool is a variable length structure composed of 
@@ -68,7 +74,7 @@ package decompiler.tags.doabc
 		 * The value of method_count is the number of entries in the method array. 
 		 * Each entry in the method array is a variable length method_info structure. 
 		 * The array holds information about every method defined in this abcFile. 
-		 * The code for method bodies is held separately in the method_body array (see below). ]
+		 * The code for method bodies is held separately in the method_body array (see below). 
 		 * Some entries in method may have no body—this is the case for native methods, for example.
 		 */
 		private var _methodInfoArr:Vector.<MethodInfo>;
@@ -84,8 +90,8 @@ package decompiler.tags.doabc
 		 * Each class entry defines the characteristics of a class. 
 		 * It is used in conjunction with the instance field to derive a full description of an AS Class.
 		 */
-		private var _classInstanceArr:Vector.<CInstance>;
-		private var _classArr:Vector.<CClass>
+		private var _instanceInfoArr:Vector.<InstanceInfo>;
+		private var _classInfoArr:Vector.<ClassInfo>;
 		
 		/**
 		 * The value of script_count is the number of entries in the script array. 
@@ -93,18 +99,23 @@ package decompiler.tags.doabc
 		 * As explained in the previous chapter, 
 		 * the last entry in this array is the entry point for execution in the abcFile.
 		 */
-		private var _scriptArr:Vector.<ScriptInfo>;
+		private var _scriptInfoArr:Vector.<ScriptInfo>;
 		/**
 		 * The value of method_body_count is the number of entries in the method_body array. 
 		 * Each method_body entry consists of a variable length method_body_info structure 
 		 * which contains the instructions for an individual method or function.
 		 */
 		private var _methodBodyArr:Vector.<MethodBody>;
-		
-		private static var _instance:ABCFile;
-		public static function getInstance():ABCFile
+		private var _isModified:Boolean;
+
+		public function set isModified(value:Boolean):void
 		{
-			return _instance ||= new ABCFile;
+			_isModified = value;
+		}
+
+		public function get isModified():Boolean
+		{
+			return _isModified;
 		}
 		
 		public function ABCFile()
@@ -113,80 +124,119 @@ package decompiler.tags.doabc
 		
 		public function encode():ByteArray
 		{
-			return null;
+			var byte:ByteArray = new ByteArray;
+			byte.endian = Endian.LITTLE_ENDIAN;
+			byte.writeShort(minor_version);
+			byte.writeShort(major_version);
+			byte.writeBytes(_cpoolInfo.encode());
+			writeVec(byte, _methodInfoArr);
+			writeVec(byte, _metadataArr);
+			writeVec(byte, _instanceInfoArr);
+//			u30 class_count
+//			instance_info instance[class_count]
+//			class_info class[class_count]
+//			_classInfoArr和_instanceInfoArr长度一致，而只用写入一次长度
+			writeVec(byte, _classInfoArr, false);
+			writeVec(byte, _scriptInfoArr);
+			writeVec(byte, _methodBodyArr);
+			return byte;
+		}
+		
+		public function addConstant(type:int, value:*):void
+		{
+			_cpoolInfo.addConstant(type, value);
+		}
+		
+		public function removeConstanct(type:int, index:uint):ReferencedElement
+		{
+			return _cpoolInfo.removeConstance(type, index);
+		}
+		
+		private function writeVec(byte:ByteArray, vec:*, needLength:Boolean = true):void
+		{
+			var length:int = vec.length;
+			needLength && SWFUtil.writeU30(byte, length);
+			for (var i:int = 0; i < length; ++i) 
+			{
+				byte.writeBytes(vec[i].encode());
+			}
 		}
 		
 		public function decodeFromBytes(byte:ByteArray):void
 		{
 			minor_version = byte.readUnsignedShort();
 			major_version = byte.readUnsignedShort();
-			_cpoolInfo = new Cpool_info;
+			_cpoolInfo = elementFactory(Cpool_info) as Cpool_info;
 			_cpoolInfo.decodeFromBytes(byte);
 			var length:int;
 			//method_count
 			length = SWFUtil.readU30(byte);
-			trace("ABCData " + "methodInfoLength " + length);
+//			trace("ABCData " + "methodInfoLength " + length);
 			_methodInfoArr = new Vector.<MethodInfo>(length);
 			for (var i:int = 0; i < length; ++i) 
 			{
-				var mi:MethodInfo = new MethodInfo;
+				var mi:MethodInfo = elementFactory(MethodInfo) as MethodInfo;
 				mi.decodeFromBytes(byte);
 				_methodInfoArr[i] = mi;
 			}
 			
 			//metadata_count
 			length = SWFUtil.readU30(byte);
-			trace("ABCData " + "metadataLength " + length);
+//			trace("ABCData " + "metadataLength " + length);
 			_metadataArr = new Vector.<ABCMetadata>(length);
 			for (i = 0; i < length; ++i) 
 			{
-				var metadata:ABCMetadata = new ABCMetadata;
+				var metadata:ABCMetadata = elementFactory(ABCMetadata) as ABCMetadata;
 				metadata.decodeFromBytes(byte);
 				_metadataArr[i] = metadata;
 			}
 			
 			//class_count
 			length = SWFUtil.readU30(byte);
-			trace("ABCData " + "classLength " + length);
-			_classInstanceArr = new Vector.<CInstance>(length);
+//			trace("ABCData " + "classLength " + length);
+			_instanceInfoArr = new Vector.<InstanceInfo>(length);
 			for (i = 0; i < length; ++i) 
 			{
-				var instance:CInstance = new CInstance;
+				var instance:InstanceInfo = elementFactory(InstanceInfo) as InstanceInfo;
 				instance.decodeFromBytes(byte);
-				_classInstanceArr[i] = instance;
+				_instanceInfoArr[i] = instance;
 			}
 			
-			_classArr = new Vector.<CClass>(length);
+			_classInfoArr = new Vector.<ClassInfo>(length);
 			for (i = 0; i < length; ++i) 
 			{
-				var cClass:CClass = new CClass;
+				var cClass:ClassInfo = elementFactory(ClassInfo) as ClassInfo;
 				cClass.decodeFromBytes(byte);
-				_classArr[i] = cClass;
+				_classInfoArr[i] = cClass;
 			}
 			
 			//script_count
 			length = SWFUtil.readU30(byte);
-			trace("ABCData " + "scriptLength " + length);
-			_scriptArr = new Vector.<ScriptInfo>(length);
+//			trace("ABCData " + "scriptLength " + length);
+			_scriptInfoArr = new Vector.<ScriptInfo>(length);
 			for (i = 0; i < length; ++i) 
 			{
-				var script:ScriptInfo = new ScriptInfo;
+				var script:ScriptInfo = elementFactory(ScriptInfo) as ScriptInfo;
 				script.decodeFromBytes(byte);
-				_scriptArr[i] = script;
+				_scriptInfoArr[i] = script;
 			}
 			//method_body_count
 			length = SWFUtil.readU30(byte);
-			trace("ABCData " + "methodBodyLength " + length);
+//			trace("ABCData " + "methodBodyLength " + length);
 			_methodBodyArr = new Vector.<MethodBody>(length);
 			for (i = 0; i < length; ++i) 
 			{
-				var mb:MethodBody = new MethodBody;
+				var mb:MethodBody = elementFactory(MethodBody) as MethodBody;
 				mb.decodeFromBytes(byte);
 				_methodBodyArr[i] = mb;
 			}
 			//此时该tag应该解析完成了，不应该有剩余的字节
 			if(byte.bytesAvailable > 0)
+			{
 				throw new Error("tag尚有多余字节");
+			}else{
+				dispatchEvent(new ABCFileEvent(ABCFileEvent.PARSE_COMPLETE));
+			}
 		}
 		
 		public function getIntLength():int
@@ -194,7 +244,7 @@ package decompiler.tags.doabc
 			return _cpoolInfo.getIntLength();
 		}
 		
-		public function getIntByIndex(index:int):int
+		public function getIntByIndex(index:int):Cint
 		{
 			return _cpoolInfo.getIntByIndex(index);
 		}
@@ -204,7 +254,7 @@ package decompiler.tags.doabc
 			return _cpoolInfo.getUintLength(); 
 		}
 		
-		public function getUintByIndex(index:int):uint
+		public function getUintByIndex(index:int):Cuint
 		{
 			return _cpoolInfo.getUintByIndex(index);
 		}
@@ -214,7 +264,7 @@ package decompiler.tags.doabc
 			return _cpoolInfo.getDoubleLength();
 		}
 		
-		public function getDoubleByIndex(index:int):Number
+		public function getDoubleByIndex(index:int):CDouble
 		{
 			return _cpoolInfo.getDoubleByIndex(index);
 		}
@@ -227,6 +277,11 @@ package decompiler.tags.doabc
 		public function getStringByIndex(index:int):CString
 		{
 			return _cpoolInfo.getStringByIndex(index);
+		}
+		
+		public function getStrings():Vector.<CString>
+		{
+			return _cpoolInfo.getStrings();
 		}
 		
 		public function getStringStrFormByIndex(index:int):String
@@ -321,9 +376,24 @@ package decompiler.tags.doabc
 			}
 		}
 		
-		public function getMethodByIndex(index:int):MethodInfo
+		public function addReferenceByKindAndIndex(kind:int, index:int, referencObject:IReferenceable):void
+		{
+			IReferenced(getValueByKindAndIndex(kind, index)).addReference(referencObject, "kind");
+		}
+		
+		public function removeReferenceByKindAndIndex(kind:int, index:int, referencObject:IReferenceable):void
+		{
+			IReferenced(getValueByKindAndIndex(kind, index)).removeReference(referencObject, "kind");
+		}
+		
+		public function getMethodInfoByIndex(index:int):MethodInfo
 		{
 			return _methodInfoArr[index];
+		}
+		
+		public function getMethodInfos():Vector.<MethodInfo>
+		{
+			return _methodInfoArr.slice();
 		}
 		
 		public function getMethodBodyByIndex(index:int):MethodBody
@@ -331,16 +401,123 @@ package decompiler.tags.doabc
 			return _methodBodyArr[index];
 		}
 		
-		public function getClassInfoByIndex(index:int):CClass
+		public function getClassInfoByIndex(index:int):ClassInfo
 		{
-			return _classArr[index];
+			return _classInfoArr[index];
 		}
 		
-		public function getInstanceInfoByIndex(index:int):CInstance
+		public function getInstanceInfoByIndex(index:int):InstanceInfo
 		{
-			return _classInstanceArr[index];
+			return _instanceInfoArr[index];
 		}
 		
+		public function elementFactory(cls:Class):ABCFileElement
+		{
+			var element:ABCFileElement = new cls;
+			element.setAbcFile(this);
+			return element;
+		}
 		
+		public function toXML(name:String = null):SWFXML
+		{
+			var xml:SWFXML = new SWFXML("abc");
+			xml.setAttribute("minor_version", minor_version);
+			xml.setAttribute("major_version", major_version);
+			xml.appendChild(_cpoolInfo.toXML());
+			var length:int = _methodInfoArr.length;
+			var methodInfos:SWFXML = new SWFXML("methodInfos");
+			methodInfos.setAttribute("length", length);
+			xml.appendChild(methodInfos);
+			for (var i:int = 0; i < length; ++i) 
+			{
+				methodInfos.appendChild(_methodInfoArr[i].toXML("methodInfo_" + i));
+			}
+			
+			length = _metadataArr.length;
+			var metadatas:SWFXML = new SWFXML("metadatas");
+			metadatas.setAttribute("length", length);
+			xml.appendChild(metadatas);
+			for (i = 0; i < length; ++i) 
+			{
+				metadatas.appendChild(_metadataArr[i].toXML("metadata_" + i));
+			}
+			
+			length = _classInfoArr.length;
+			var instances:SWFXML = new SWFXML("instances");
+			instances.setAttribute("length", length);
+			xml.appendChild(instances);
+			for (i = 0; i < length; ++i) 
+			{
+				instances.appendChild(_instanceInfoArr[i].toXML("InstanceInfo_" + i));
+			}
+			
+			var classes:SWFXML = new SWFXML("classes");
+			classes.setAttribute("length", length);
+			xml.appendChild(classes);
+			for (i = 0; i < length; ++i) 
+			{
+				classes.appendChild(_classInfoArr[i].toXML("classInfo_" + i));
+			}
+			
+			length = _scriptInfoArr.length;
+			var scripts:SWFXML = new SWFXML("scriptInfos");
+			scripts.setAttribute("length", length);
+			xml.appendChild(scripts);
+			for (i = 0; i < length; ++i) 
+			{
+				scripts.appendChild(_scriptInfoArr[i].toXML("scriptInfo_" + i));
+			}
+			
+			length = _methodBodyArr.length;
+			var methodBodies:SWFXML = new SWFXML("methodBodies");
+			methodBodies.setAttribute("length", length);
+			xml.appendChild(methodBodies);
+			for (i = 0; i < length; ++i) 
+			{
+				methodBodies.appendChild(_methodBodyArr[i].toXML("methodBody_" + i));
+			}
+			
+			return xml;
+		}
+		
+		public function getInstanceInfos():Vector.<InstanceInfo>
+		{
+			return _instanceInfoArr.slice();
+		}
+		
+		public function getStringByValue(value:String):CString
+		{
+			return _cpoolInfo.getStringByValue(value);
+		}
+		
+		public function getintByValue(value:int):Cint
+		{
+			return _cpoolInfo.getintByValue(value);
+		}
+		
+		public function getuintByValue(value:uint):Cuint
+		{
+			return _cpoolInfo.getuintByValue(value);
+		}
+		
+		public function getDoubleByValue(value:Number):CDouble
+		{
+			return _cpoolInfo.getDoubleByValue(value);;
+		}
+		
+		public function getMethodBodies():Vector.<MethodBody>
+		{
+			return _methodBodyArr.slice();
+		}
+		
+		public function getNamespaces():Vector.<CNameSpace>
+		{
+			return _cpoolInfo.getNamespaces();
+		}
+		
+		public function getNamespcaseByValue(kind:int, name:int):CNameSpace
+		{
+			return getNamespcaseByValue(kind, name);
+		}
 	}
 }

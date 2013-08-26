@@ -1,11 +1,11 @@
 package decompiler.tags.doabc.cpools.multinames
 {
+	import decompiler.tags.doabc.Reference;
+	import decompiler.utils.SWFUtil;
+	import decompiler.utils.SWFXML;
+	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	
-	import decompiler.tags.doabc.ABCFile;
-	
-	import decompiler.utils.SWFUtil;
 
 	public class CQNameA extends SWFMultiname
 	{
@@ -18,7 +18,10 @@ package decompiler.tags.doabc.cpools.multinames
 		
 		public function set ns(value:int):void
 		{
+			modify();
+			$abcFile.getStringByIndex(_name).removeReference(this, "ns");
 			_ns = value;
+			$abcFile.getStringByIndex(_name).addReference(this, "ns");
 		}
 		
 		private var _name:int;
@@ -30,7 +33,10 @@ package decompiler.tags.doabc.cpools.multinames
 		
 		public function set name(value:int):void
 		{
+			modify();
+			$abcFile.getStringByIndex(_name).removeReference(this, "name");
 			_name = value;
+			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
 		
 		public function CQNameA(ns:int = 0, name:int = 0)
@@ -49,6 +55,7 @@ package decompiler.tags.doabc.cpools.multinames
 			}*/
 			_ns = SWFUtil.readU30(byte);
 			_name = SWFUtil.readU30(byte);
+			super.decodeFromBytes(byte);
 		}
 		
 		override protected function encodeData():ByteArray
@@ -62,8 +69,19 @@ package decompiler.tags.doabc.cpools.multinames
 		
 		override public function toString():String
 		{
-			var abcFile:ABCFile = ABCFile.getInstance();
-			return "[ CQNameA ns:" + abcFile.getNsSetByIndex(_ns) + " name:" + abcFile.getStringByIndex(_name) + " ]";
+			return "[ CQNameA ns:" + $abcFile.getNsSetByIndex(_ns) + ", name:" + $abcFile.getStringByIndex(_name) + " ]";
+		}
+		
+		override protected function contentToXML(xml:SWFXML):void
+		{
+			xml.appendChild("<ns>" + $abcFile.getNamespaceByIndex(_ns).toXML() + " ns(" + _ns + ")" + "</ns>");
+			xml.appendChild("<name>" + $abcFile.getStringByIndex(_name) + "(str_" + _name + ")" + "</name>");
+		}
+		
+		override public function creatRefrenceRelationship():void
+		{
+			$abcFile.getNamespaceByIndex(_ns).addReference(this, "ns");
+			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
 	}
 }

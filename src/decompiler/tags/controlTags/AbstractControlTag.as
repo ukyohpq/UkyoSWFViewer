@@ -6,9 +6,9 @@ package decompiler.tags.controlTags
 	
 	public class AbstractControlTag extends SWFTag
 	{
-		public function AbstractControlTag(id:int, data:ByteArray, preFix:String="")
+		public function AbstractControlTag(id:int, data:ByteArray)
 		{
-			super(id, data, preFix);
+			super(id, data);
 		}
 	}
 }
