@@ -1,6 +1,7 @@
 package decompiler.tags.doabc.trait
 {
 	import decompiler.tags.doabc.ABCFileElement;
+	import decompiler.tags.doabc.IHasTraits;
 	import decompiler.tags.doabc.IReferenceable;
 	import decompiler.tags.doabc.trait.traitData.AbstractTraitData;
 	import decompiler.tags.doabc.trait.traitData.TraitDataFactory;
@@ -24,6 +25,23 @@ package decompiler.tags.doabc.trait
 	 */
 	public class TraitsInfo extends ABCFileElement implements IReferenceable
 	{
+		private var _target:IHasTraits;
+
+		/**
+		 * 拥有这个trait的对象
+		 * @return 
+		 * 
+		 */
+		public function get target():IHasTraits
+		{
+			return _target;
+		}
+
+		public function set target(value:IHasTraits):void
+		{
+			_target = value;
+		}
+
 		private var _name:uint;
 
 		/**
@@ -47,12 +65,18 @@ package decompiler.tags.doabc.trait
 			$abcFile.getMultinameByIndex(_name).addReference(this, "name");
 		}
 
+		private var _data:AbstractTraitData;
+
 		/**
 		 * The interpretation of the data field depends on the type of the trait, 
 		 * which is provided by the low four bits of the kind field. 
 		 * See below for a full description.
 		 */
-		private var _data:AbstractTraitData;
+		public function get data():AbstractTraitData
+		{
+			return _data;
+		}
+
 		
 		/**
 		 * These fields are present only if ATTR_Metadata is present in the upper four bits of the kind field.
@@ -63,8 +87,43 @@ package decompiler.tags.doabc.trait
 		
 		//traiAttributes
 		private var _isMetadata:int;
+
+		public function get isMetadata():int
+		{
+			return _isMetadata;
+		}
+
+		public function set isMetadata(value:int):void
+		{
+			modify();
+			_isMetadata = value;
+		}
+
 		private var _isOverride:int;
+
+		public function get isOverride():int
+		{
+			return _isOverride;
+		}
+
+		public function set isOverride(value:int):void
+		{
+			modify();
+			_isOverride = value;
+		}
+
 		private var _isFinal:int;
+
+		public function get isFinal():int
+		{
+			return _isFinal;
+		}
+
+		public function set isFinal(value:int):void
+		{
+			modify();
+			_isFinal = value;
+		}
 		
 		public function TraitsInfo()
 		{
@@ -162,5 +221,9 @@ package decompiler.tags.doabc.trait
 			$abcFile.getMultinameByIndex(_name).addReference(this, "name");
 		}
 		
+		public function get kind():int
+		{
+			return _data.getKind();
+		}
 	}
 }

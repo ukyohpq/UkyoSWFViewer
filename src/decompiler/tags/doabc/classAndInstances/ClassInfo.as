@@ -1,5 +1,6 @@
 package decompiler.tags.doabc.classAndInstances
 {
+	import decompiler.tags.doabc.IHasTraits;
 	import decompiler.tags.doabc.ReferencedElement;
 	import decompiler.tags.doabc.trait.TraitsInfo;
 	import decompiler.utils.SWFUtil;
@@ -19,7 +20,7 @@ package decompiler.tags.doabc.classAndInstances
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ClassInfo extends ReferencedElement
+	public class ClassInfo extends ReferencedElement implements IHasTraits
 	{
 		/**
 		 * This is an index into the method array of the abcFile; 
@@ -49,6 +50,7 @@ package decompiler.tags.doabc.classAndInstances
 			for (var i:int = 0; i < length; ++i) 
 			{
 				var traitInfo:TraitsInfo = $abcFile.elementFactory(TraitsInfo) as TraitsInfo;
+				traitInfo.target = this;
 				traitInfo.decodeFromBytes(byte);
 				_traitsArray[i] = traitInfo;
 			}
@@ -100,6 +102,38 @@ package decompiler.tags.doabc.classAndInstances
 			return xml;
 		}
 		
+		
+		public function addTrait(trait:TraitsInfo):void
+		{
+			_traitsArray.push(trait);
+			modify();
+		}
+		
+		public function addTraitAt(trait:TraitsInfo, index:int):void
+		{
+			_traitsArray.splice(index, 0, trait);
+			modify();
+		}
+		
+		public function getTraits():Vector.<TraitsInfo>
+		{
+			return _traitsArray.slice();
+		}
+		
+		public function removeTrait(trait:TraitsInfo):void
+		{
+			var index:int = _traitsArray.indexOf(trait);
+			if(index == -1)
+				throw new Error("并没有这个trait");
+			removeTraitAt(index);
+			modify();
+		}
+		
+		public function removeTraitAt(index:int):void
+		{
+			_traitsArray.splice(index, 1);
+			modify();
+		}
 		
 	}
 }

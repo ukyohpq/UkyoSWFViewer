@@ -13,13 +13,13 @@ package decompiler.tags.doabc
 			_refrences = new <Reference>[];
 		}
 		
-		public function addReference(element:IReferenceable, propertyName:String, param:int = 0):void
+		public function addReference(element:IReferenceable, propertyName:String, param:int = -1):void
 		{
 			var reference:Reference = Reference.getFromPool(element, propertyName, param);
 			_refrences.push(reference);
 		}
 		
-		public function removeReference(element:IReferenceable, propertyName:String, param:int = 0):void
+		public function removeReference(element:IReferenceable, propertyName:String, param:int = -1):void
 		{
 			var length:int = _refrences.length;
 			for (var i:int = 0; i < length; ++i) 

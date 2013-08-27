@@ -8,7 +8,7 @@ package decompiler.tags.doabc
 	public class Reference
 	{
 		private static var _pool:Vector.<Reference> = new <Reference>[];
-		public static function getFromPool(element:IReferenceable, propertyName:String, param:int = 0):Reference
+		public static function getFromPool(element:IReferenceable, propertyName:String, param:int = -1):Reference
 		{
 			var reference:Reference;
 			if(_pool.length)
@@ -60,7 +60,7 @@ package decompiler.tags.doabc
 		 * @param params	该名称属性的参数，可选，因为有的情况是属性是个数组，数组的某索引的元素引用了一个引用对象
 		 * 
 		 */
-		public function Reference(element:IReferenceable, propertyName:String, param:int = 0)
+		public function Reference(element:IReferenceable, propertyName:String, param:int = -1)
 		{
 			_element = element;
 			_propertyName = propertyName;
@@ -72,7 +72,7 @@ package decompiler.tags.doabc
 			return _element == re._element && _propertyName == re._propertyName && _param == re._param;
 		}
 		
-		public function equals2(element:IReferenceable, propertyName:String, param:int = 0):Boolean
+		public function equals2(element:IReferenceable, propertyName:String, param:int = -1):Boolean
 		{
 			return _element == element && _propertyName == propertyName && _param == param;
 		}

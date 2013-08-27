@@ -6,13 +6,13 @@ package decompiler.tags.doabc
 	import decompiler.tags.doabc.classAndInstances.ClassInfo;
 	import decompiler.tags.doabc.classAndInstances.InstanceInfo;
 	import decompiler.tags.doabc.cpools.CDouble;
-	import decompiler.tags.doabc.cpools.namespaces.CNameSpace;
 	import decompiler.tags.doabc.cpools.CNsSet;
 	import decompiler.tags.doabc.cpools.CString;
 	import decompiler.tags.doabc.cpools.Cint;
 	import decompiler.tags.doabc.cpools.Cpool_info;
 	import decompiler.tags.doabc.cpools.Cuint;
 	import decompiler.tags.doabc.cpools.multinames.SWFMultiname;
+	import decompiler.tags.doabc.cpools.namespaces.CNameSpace;
 	import decompiler.tags.doabc.events.ABCFileEvent;
 	import decompiler.tags.doabc.metadata.ABCMetadata;
 	import decompiler.tags.doabc.method.MethodInfo;
@@ -142,9 +142,9 @@ package decompiler.tags.doabc
 			return byte;
 		}
 		
-		public function addConstant(type:int, value:*):void
+		public function addConstant(type:int, params:Array):void
 		{
-			_cpoolInfo.addConstant(type, value);
+			_cpoolInfo.addConstant(type, params);
 		}
 		
 		public function removeConstanct(type:int, index:uint):ReferencedElement
@@ -518,6 +518,40 @@ package decompiler.tags.doabc
 		public function getNamespcaseByValue(kind:int, name:int):CNameSpace
 		{
 			return getNamespcaseByValue(kind, name);
+		}
+		
+		/**
+		 * 检查指定multiname索引的instanceinfo是否存在
+		 * @param MNIndex
+		 * @return 
+		 * 
+		 */
+		public function hasInstanceInABC(MNIndex:int):Boolean
+		{
+			var length:int = _instanceInfoArr.length;
+			for (var i:int = 0; i < length; ++i) 
+			{
+				if(_instanceInfoArr[i].name == MNIndex)
+					return true;
+			}
+			return false;
+		}
+		
+		/**
+		 * 获取指定multiname索引的instanceinfo
+		 * @param MNIndex
+		 * @return 
+		 * 
+		 */
+		public function getInstanceInfoByMN(MNIndex:int):InstanceInfo
+		{
+			var length:int = _instanceInfoArr.length;
+			for (var i:int = 0; i < length; ++i) 
+			{
+				if(_instanceInfoArr[i].name == MNIndex)
+					return _instanceInfoArr[i];
+			}
+			return null;
 		}
 	}
 }

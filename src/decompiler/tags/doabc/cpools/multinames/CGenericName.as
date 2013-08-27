@@ -1,5 +1,6 @@
 package decompiler.tags.doabc.cpools.multinames
 {
+	import decompiler.tags.doabc.IReferenceableArray;
 	import decompiler.tags.doabc.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
@@ -22,7 +23,7 @@ package decompiler.tags.doabc.cpools.multinames
 	 * @author ukyohpq
 	 * 
 	 */
-	public class CGenericName extends SWFMultiname
+	public class CGenericName extends SWFMultiname implements IReferenceableArray
 	{
 		private var _typeDefinition:int;
 
@@ -47,7 +48,7 @@ package decompiler.tags.doabc.cpools.multinames
 			return _params.slice();
 		}
 
-		public function setValueAt(value:uint, index:int = -1):void
+		public function setValueAt(value:uint, index:uint = -1):void
 		{
 			if(index < 0 || index >= _params.length)
 			{

@@ -2,6 +2,7 @@ package decompiler.tags.doabc.cpools
 {
 	import decompiler.tags.doabc.ABCFileElement;
 	import decompiler.tags.doabc.IReferenceable;
+	import decompiler.tags.doabc.IReferenceableArray;
 	import decompiler.tags.doabc.Reference;
 	import decompiler.tags.doabc.ReferencedElement;
 	import decompiler.tags.doabc.events.ABCFileEvent;
@@ -21,7 +22,7 @@ package decompiler.tags.doabc.cpools
 	 * @author ukyohpq
 	 * 
 	 */
-	public class CNsSet extends ReferencedElement implements IReferenceable
+	public class CNsSet extends ReferencedElement implements IReferenceableArray
 	{
 		private var _nsArr:Vector.<uint>;
 

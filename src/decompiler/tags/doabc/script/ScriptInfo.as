@@ -1,6 +1,7 @@
 package decompiler.tags.doabc.script
 {
 	import decompiler.tags.doabc.ABCFileElement;
+	import decompiler.tags.doabc.IHasTraits;
 	import decompiler.tags.doabc.IReferenceable;
 	import decompiler.tags.doabc.Reference;
 	import decompiler.tags.doabc.trait.TraitsInfo;
@@ -21,7 +22,7 @@ package decompiler.tags.doabc.script
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ScriptInfo extends ABCFileElement implements IReferenceable
+	public class ScriptInfo extends ABCFileElement implements IReferenceable, IHasTraits
 	{
 		private var _init:int;
 
@@ -65,6 +66,7 @@ package decompiler.tags.doabc.script
 			for (var i:int = 0; i < length; ++i) 
 			{
 				var traitInfo:TraitsInfo = $abcFile.elementFactory(TraitsInfo) as TraitsInfo;
+				traitInfo.target = this;
 				traitInfo.decodeFromBytes(byte);
 				_traitsArray[i] = traitInfo;
 			}
@@ -113,6 +115,38 @@ package decompiler.tags.doabc.script
 		public function creatRefrenceRelationship():void
 		{
 			$abcFile.getMethodInfoByIndex(_init).addReference(this, "init");
+		}
+		
+		public function addTrait(trait:TraitsInfo):void
+		{
+			_traitsArray.push(trait);
+			modify();
+		}
+		
+		public function addTraitAt(trait:TraitsInfo, index:int):void
+		{
+			_traitsArray.splice(index, 0, trait);
+			modify();
+		}
+		
+		public function getTraits():Vector.<TraitsInfo>
+		{
+			return _traitsArray.slice();
+		}
+		
+		public function removeTrait(trait:TraitsInfo):void
+		{
+			var index:int = _traitsArray.indexOf(trait);
+			if(index == -1)
+				throw new Error("并没有这个trait");
+			removeTraitAt(index);
+			modify();
+		}
+		
+		public function removeTraitAt(index:int):void
+		{
+			_traitsArray.splice(index, 1);
+			modify();
 		}
 		
 	}

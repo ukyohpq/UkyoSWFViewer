@@ -57,6 +57,8 @@ package decompiler.tags.doabc.cpools.namespaces
 
 		public function set name(value:uint):void
 		{
+			if(_name == value)
+				return;
 			modify();
 			$abcFile.getStringByIndex(_name).removeReference(this, "name");
 			_name = value;

@@ -16,13 +16,13 @@ package decompiler.tags.doabc.cpools
 	import decompiler.tags.doabc.cpools.multinames.MultinameKind;
 	import decompiler.tags.doabc.cpools.multinames.SWFMultiname;
 	import decompiler.tags.doabc.cpools.multinames.SWFMultinameFactory;
+	import decompiler.tags.doabc.cpools.namespaces.CNameSpace;
+	import decompiler.tags.doabc.cpools.namespaces.CNameSpace_0;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	import decompiler.tags.doabc.cpools.namespaces.CNameSpace;
-	import decompiler.tags.doabc.cpools.namespaces.CNameSpace_0;
 
 	/**
 	 * cpool_info
@@ -410,12 +410,12 @@ package decompiler.tags.doabc.cpools
 			return xml;
 		}
 		
-		public function addConstant(type:int, ...args):void
+		public function addConstant(type:int, params:Array):void
 		{
 			//先把传进来的数字进行整理，确定类别
 			if(type == 0 || type == 1 || type == 2)
 			{
-				var num:Number = args[0];
+				var num:Number = params[0];
 				if(int(num) == num)//如果转型成int后，发现转和不转相等，那么它就是一个int
 				{
 					type = 0;
@@ -433,69 +433,69 @@ package decompiler.tags.doabc.cpools
 			{
 				case CPOOL_TYPE_INT:
 					var cint:Cint = $abcFile.elementFactory(Cint) as Cint;
-					cint.value = args[0];
+					cint.value = params[0];
 					_integerArray.push(cint);
 					break;
 				case CPOOL_TYPE_UINT:
 					var cuint:Cuint = $abcFile.elementFactory(Cuint) as Cuint;
-					cuint.value = args[0];
+					cuint.value = params[0];
 					_uintegerArray.push(cuint);
 					break;
 				case CPOOL_TYPE_DBL:
 					var cdouble:CDouble = $abcFile.elementFactory(CDouble) as CDouble;
-					cdouble.value = args[0];
+					cdouble.value = params[0];
 					_doubleArray.push(cdouble);
 					break;
 				case CPOOL_TYPE_STR:
 					var cstr:CString = $abcFile.elementFactory(CString) as CString;
-					cstr.str = args[0];
+					cstr.str = params[0];
 					_stringArr.push(cstr);
 					break;
 				case CPOOL_TYPE_NS:
 					var ns:CNameSpace = $abcFile.elementFactory(CNameSpace) as CNameSpace;
-					ns.kind = args[0];
-					ns.name = args[1];
+					ns.kind = params[0];
+					ns.name = params[1];
 					_namespaceArr.push(ns);
 					break;
 				case CPOOL_TYPE_NSS:
 					var nss:CNsSet = $abcFile.elementFactory(CNsSet) as CNsSet;
-					var length:int = args.length - 2;
+					var length:int = params.length - 2;
 					for (var i:int = 0; i < length; ++i) 
 					{
-						nss.setValueAt(args[i + 2]);
+						nss.setValueAt(params[i + 2]);
 					}
 					_nsSetArr.push(nss);
 				case CPOOL_TYPE_MN:
-					var mn:SWFMultiname = SWFMultinameFactory.factory(args[0], $abcFile);
+					var mn:SWFMultiname = SWFMultinameFactory.factory(params[0], $abcFile);
 					switch(mn["constructor"])
 					{
 						case CQName:
 						case CQNameA:
-							mn["ns"] = args[1];
-							mn["name"] = args[2];
+							mn["ns"] = params[1];
+							mn["name"] = params[2];
 							break;
 						case CRTQName:
 						case CRTQNameA:
-							mn["name"] = args[1];
+							mn["name"] = params[1];
 							break;
 						case CRTQNameL:
 						case CRTQNameLA:
 							break;
 						case CMultiname:
 						case CMultinameA:
-							mn["name"] = args[1];
-							mn["ns_set"] = args[2];
+							mn["name"] = params[1];
+							mn["ns_set"] = params[2];
 							break;
 						case CMultinameL:
 						case CMultinameLA:
-							mn["ns_set"] = args[1];
+							mn["ns_set"] = params[1];
 							break;
 						case CGenericName:
-							mn["typeDefinition"] = args[1];
-							length = args.length - 2;
+							mn["typeDefinition"] = params[1];
+							length = params.length - 2;
 							for (var j:int = 0; j < length; ++j) 
 							{
-								mn["setValueAt"](args[j + 2]);
+								mn["setValueAt"](params[j + 2]);
 							}
 							break;
 					}

@@ -1,5 +1,6 @@
 package decompiler.tags.doabc.methodBody
 {
+	import decompiler.tags.doabc.IHasTraits;
 	import decompiler.tags.doabc.IReferenceable;
 	import decompiler.tags.doabc.Reference;
 	import decompiler.tags.doabc.ReferencedElement;
@@ -43,7 +44,7 @@ package decompiler.tags.doabc.methodBody
 	 * @author ukyohpq
 	 * 
 	 */
-	public class MethodBody extends ReferencedElement implements IReferenceable
+	public class MethodBody extends ReferencedElement implements IReferenceable, IHasTraits
 	{
 		private var _method:int;
 
@@ -167,7 +168,7 @@ package decompiler.tags.doabc.methodBody
 		 * The value of trait_count is the number of elements in the trait array. 
 		 * The trait array contains all the traits for this method body (see above for more information on traits).
 		 */
-		private var _traitArray:Vector.<TraitsInfo>;
+		private var _traitsArray:Vector.<TraitsInfo>;
 		public function MethodBody()
 		{
 		}
@@ -214,12 +215,13 @@ package decompiler.tags.doabc.methodBody
 			
 			//read trait_count
 			length = SWFUtil.readU30(byte);
-			_traitArray = new Vector.<TraitsInfo>(length);
+			_traitsArray = new Vector.<TraitsInfo>(length);
 			for (i = 0; i < length; ++i) 
 			{
 				var trait:TraitsInfo = $abcFile.elementFactory(TraitsInfo) as TraitsInfo;
+				trait.target = this;
 				trait.decodeFromBytes(byte);
-				_traitArray[i] = trait;
+				_traitsArray[i] = trait;
 			}
 			
 			include "../IReferenced_Fragment_1.as";
@@ -246,13 +248,13 @@ package decompiler.tags.doabc.methodBody
 				exceptions.appendChild(_exceptionArray[i].toXML("exception_" + i));
 			}
 			
-			length = _traitArray.length;
+			length = _traitsArray.length;
 			var traits:SWFXML = new SWFXML("traits");
 			traits.setAttribute("length", length);
 			xml.appendChild(traits);
 			for (i = 0; i < length; ++i) 
 			{
-				traits.appendChild(_traitArray[i].toXML("trait_" + i));
+				traits.appendChild(_traitsArray[i].toXML("trait_" + i));
 			}
 			return xml;
 		}
@@ -281,11 +283,11 @@ package decompiler.tags.doabc.methodBody
 				tempByte.clear();
 			}
 			
-			length = _traitArray.length;
+			length = _traitsArray.length;
 			SWFUtil.writeU30(byte, length);
 			for (i = 0; i < length; ++i) 
 			{
-				tempByte = _traitArray[i].encode();
+				tempByte = _traitsArray[i].encode();
 				byte.writeBytes(tempByte);
 				tempByte.clear();
 			}
@@ -306,6 +308,38 @@ package decompiler.tags.doabc.methodBody
 		public function creatRefrenceRelationship():void
 		{
 			$abcFile.getMethodInfoByIndex(_method).addReference(this, "method");
+		}
+		
+		public function addTrait(trait:TraitsInfo):void
+		{
+			_traitsArray.push(trait);
+			modify();
+		}
+		
+		public function addTraitAt(trait:TraitsInfo, index:int):void
+		{
+			_traitsArray.splice(index, 0, trait);
+			modify();
+		}
+		
+		public function getTraits():Vector.<TraitsInfo>
+		{
+			return _traitsArray.slice();
+		}
+		
+		public function removeTrait(trait:TraitsInfo):void
+		{
+			var index:int = _traitsArray.indexOf(trait);
+			if(index == -1)
+				throw new Error("并没有这个trait");
+			removeTraitAt(index);
+			modify();
+		}
+		
+		public function removeTraitAt(index:int):void
+		{
+			_traitsArray.splice(index, 1);
+			modify();
 		}
 		
 	}

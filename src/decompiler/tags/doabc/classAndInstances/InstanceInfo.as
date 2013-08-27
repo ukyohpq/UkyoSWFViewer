@@ -1,6 +1,10 @@
 package decompiler.tags.doabc.classAndInstances
 {
 	import decompiler.tags.doabc.ABCFileElement;
+	import decompiler.tags.doabc.IHasTraits;
+	import decompiler.tags.doabc.IReferenceable;
+	import decompiler.tags.doabc.IReferenceableArray;
+	import decompiler.tags.doabc.ReferencedElement;
 	import decompiler.tags.doabc.trait.TraitsInfo;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
@@ -24,7 +28,7 @@ package decompiler.tags.doabc.classAndInstances
 	 * @author ukyohpq
 	 * 
 	 */
-	public class InstanceInfo extends ABCFileElement
+	public class InstanceInfo extends ReferencedElement implements IReferenceableArray, IHasTraits
 	{
 		private var _name:int;
 
@@ -41,8 +45,11 @@ class. The entry specified must be a QName.
 
 		public function set name(value:int):void
 		{
+			if(_name == value) return;
 			modify();
+			$abcFile.getMultinameByIndex(_name).removeReference(this, "name");
 			_name = value;
+			$abcFile.getMultinameByIndex(_name).addReference(this, "name");
 		}
 
 		private var _superName:int;
@@ -60,8 +67,11 @@ the base class of this class, if any. A value of zero indicates that this class 
 
 		public function set superName(value:int):void
 		{
+			if(_superName == value) return;
 			modify();
+			$abcFile.getMultinameByIndex(_superName).removeReference(this, "superName");
 			_superName = value;
+			$abcFile.getMultinameByIndex(_superName).addReference(this, "superName");
 		}
 
 		
@@ -177,12 +187,18 @@ for this class.
 			_protectedNs = value;
 		}
 
+		private var _interfaceVec:Vector.<int>;
+
 		/**
 		 *The value of the intrf_count field is the number of entries in the interface array. The interface array
-contains indices into the multiname array of the constant pool; the referenced names specify the interfaces
-implemented by this class. None of the indices may be zero. 
+		contains indices into the multiname array of the constant pool; the referenced names specify the interfaces
+		implemented by this class. None of the indices may be zero. 
 		 */
-		private var _interfaceVec:Vector.<int>;
+		public function get interfaceVec():Vector.<int>
+		{
+			return _interfaceVec.slice();
+		}
+
 		
 		private var _iinit:uint;
 
@@ -204,11 +220,6 @@ an object of this class is constructed. This method is sometimes referred to as 
 		}
 
 		private var _traitsArray:Vector.<TraitsInfo>;
-
-		public function get traitsArray():Vector.<TraitsInfo>
-		{
-			return _traitsArray;
-		}
 		
 		public function InstanceInfo(name:int = 0, super_name:int = 0)
 		{
@@ -295,9 +306,38 @@ an object of this class is constructed. This method is sometimes referred to as 
 			for (i = 0; i < numTraitsInfo; ++i) 
 			{
 				var traitsInfo:TraitsInfo = $abcFile.elementFactory(TraitsInfo) as TraitsInfo;
+				traitsInfo.target = this;
 				traitsInfo.decodeFromBytes(byte);
 				_traitsArray[i] = traitsInfo;
 			}
+			
+			include "../IReferenced_Fragment_1.as";
+		}
+		
+		public function creatRefrenceRelationship():void
+		{
+			$abcFile.getMultinameByIndex(_name).addReference(this, "name");
+			$abcFile.getMultinameByIndex(_superName).addReference(this, "superName");
+			$abcFile.getNamespaceByIndex(_protectedNs).addReference(this, "protectedNs");
+			var length:int = _interfaceVec.length;
+			for (var i:int = 0; i < length; ++i) 
+			{
+				$abcFile.getMultinameByIndex(_interfaceVec[i]).addReference(this, "interfaceVec", i);
+			}
+		}
+		
+		public function setValueAt(value:uint, index:uint=-1):void
+		{
+			if(index < 0 || index >= _interfaceVec.length)
+			{
+				_interfaceVec.push(value);
+				$abcFile.getNamespaceByIndex(value).addReference(this, "interfaceVec", _interfaceVec.length - 1);
+			}else{
+				$abcFile.getNamespaceByIndex(_interfaceVec[index]).removeReference(this, "interfaceVec", index);
+				_interfaceVec[index] = value;
+				$abcFile.getNamespaceByIndex(value).addReference(this, "interfaceVec", index);
+			}
+			modify();
 		}
 		
 		override public function toXML(name:String = null):SWFXML
@@ -344,6 +384,44 @@ an object of this class is constructed. This method is sometimes referred to as 
 		public function toString():String
 		{
 			return "[ InstanceInfo name:" + $abcFile.getMultinameByIndex(_name) + " ]";
+		}
+		
+		
+		public function addTrait(trait:TraitsInfo):void
+		{
+			_traitsArray.push(trait);
+			modify();
+		}
+		
+		public function addTraitAt(trait:TraitsInfo, index:int):void
+		{
+			_traitsArray.splice(index, 0, trait);
+			modify();
+		}
+		
+		public function getTraits():Vector.<TraitsInfo>
+		{
+			return _traitsArray.slice();
+		}
+		
+		public function removeTrait(trait:TraitsInfo):void
+		{
+			var index:int = _traitsArray.indexOf(trait);
+			if(index == -1)
+				throw new Error("并没有这个trait");
+			removeTraitAt(index);
+			modify();
+		}
+		
+		public function removeTraitAt(index:int):void
+		{
+			_traitsArray.splice(index, 1);
+			modify();
+		}
+		
+		public function getSuperInstanceInfo():InstanceInfo
+		{
+			return $abcFile.getInstanceInfoByMN(superName);
 		}
 	}
 }

@@ -267,5 +267,14 @@ package decompiler
 			return xml;
 		}
 		
+		public function decode():void
+		{
+			var length:int = tagsArr.length;
+			for (var i:int = 0; i < length; ++i) 
+			{
+				var tag:SWFTag = tagsArr[i];
+				tag.decode();
+			}
+		}
 	}
 }
