@@ -1,6 +1,5 @@
-package decompiler.tags.doabc
+package decompiler.tags.doabc.trait
 {
-	import decompiler.tags.doabc.trait.TraitsInfo;
 
 	public interface IHasTraits
 	{

@@ -4,8 +4,185 @@ package decompiler.tags.doabc.instruction
 
 	public final class InstructionFactory
 	{
+		
+		
 		public function InstructionFactory()
 		{
+		}
+		
+		public static function getPCodeFormByStr(str:String):int
+		{
+			switch(str)
+			{
+				case "bkpt": return 1;
+				case "nop": return 2;
+				case "throw_": return 3;
+				case "getsuper": return 4;
+				case "setsuper": return 5;
+				case "dxns": return 6;
+				case "dxnslate": return 7;
+				case "kill": return 8;
+				case "label": return 9;
+				case "ifnlt": return 12;
+				case "ifnle": return 13;
+				case "ifngt": return 14;
+				case "ifnge": return 15;
+				case "jump": return 16;
+				case "iftrue": return 17;
+				case "iffalse": return 18;
+				case "ifeq": return 19;
+				case "ifne": return 20;
+				case "iflt": return 21;
+				case "ifle": return 22;
+				case "ifgt": return 23;
+				case "ifge": return 24;
+				case "ifstricteq": return 25;
+				case "ifstrictne": return 26;
+				case "lookupswitch": return 27;
+				case "pushwith": return 28;
+				case "popscope": return 29;
+				case "nextname": return 30;
+				case "hasnext": return 31;
+				case "pushnull": return 32;
+				case "pushundefined": return 33;
+				case "nextvalue": return 35;
+				case "pushbyte": return 36;
+				case "pushshort": return 37;
+				case "pushtrue": return 38;
+				case "pushfalse": return 39;
+				case "pushnan": return 40;
+				case "pop": return 41;
+				case "dup": return 42;
+				case "swap": return 43;
+				case "pushstring": return 44;
+				case "pushint": return 45;
+				case "pushuint": return 46;
+				case "pushdouble": return 47;
+				case "pushscope": return 48;
+				case "pushnamespace": return 49;
+				case "hasnext2": return 50;
+				case "li8": return 53;
+				case "li16": return 54;
+				case "li32": return 55;
+				case "lf32": return 56;
+				case "lf64": return 57;
+				case "si8": return 58;
+				case "si16": return 59;
+				case "si32": return 60;
+				case "sf32": return 61;
+				case "sf64": return 62;
+				case "newfunction": return 64;
+				case "call": return 65;
+				case "construct": return 66;
+				case "callmethod": return 67;
+				case "callstatic": return 68;
+				case "callsuper": return 69;
+				case "callproperty": return 70;
+				case "returnvoid": return 71;
+				case "returnvalue": return 72;
+				case "constructsuper": return 73;
+				case "constructprop": return 74;
+				case "callproplex": return 76;
+				case "callsupervoid": return 78;
+				case "callpropvoid": return 79;
+				case "sxi1": return 80;
+				case "sxi8": return 81;
+				case "sxi16": return 82;
+				case "applytype": return 83;
+				case "newobject": return 85;
+				case "newarray": return 86;
+				case "newactivation": return 87;
+				case "newclass": return 88;
+				case "getdescendants": return 89;
+				case "newcatch": return 90;
+				case "findpropstrict": return 93;
+				case "findproperty": return 94;
+				case "finddef": return 95;
+				case "getlex": return 96;
+				case "setproperty": return 97;
+				case "getlocal": return 98;
+				case "setlocal": return 99;
+				case "getglobalscope": return 100;
+				case "getscopeobject": return 101;
+				case "getproperty": return 102;
+				case "initproperty": return 104;
+				case "deleteproperty": return 106;
+				case "getslot": return 108;
+				case "setslot": return 109;
+				case "getglobalslot": return 110;
+				case "setglobalslot": return 111;
+				case "convert_s": return 112;
+				case "esc_xelem": return 113;
+				case "esc_xattr": return 114;
+				case "convert_i": return 115;
+				case "convert_u": return 116;
+				case "convert_d": return 117;
+				case "convert_b": return 118;
+				case "convert_o": return 119;
+				case "checkfilter": return 120;
+				case "coerce": return 128;
+				case "coerce_b": return 129;
+				case "coerce_a": return 130;
+				case "coerce_i": return 131;
+				case "coerce_d": return 132;
+				case "coerce_s": return 133;
+				case "astype": return 134;
+				case "astypelate": return 135;
+				case "coerce_u": return 136;
+				case "coerce_o": return 137;
+				case "negate": return 144;
+				case "increment": return 145;
+				case "inclocal": return 146;
+				case "decrement": return 147;
+				case "declocal": return 148;
+				case "typeof_": return 149;
+				case "not": return 150;
+				case "bitnot": return 151;
+				case "add": return 160;
+				case "subtract": return 161;
+				case "multiply": return 162;
+				case "divide": return 163;
+				case "modulo": return 164;
+				case "lshift": return 165;
+				case "rshift": return 166;
+				case "urshift": return 167;
+				case "bitand": return 168;
+				case "bitor": return 169;
+				case "bitxor": return 170;
+				case "equals": return 171;
+				case "strictequals": return 172;
+				case "lessthan": return 173;
+				case "lessequals": return 174;
+				case "greaterthan": return 175;
+				case "greaterequals": return 176;
+				case "instanceof_": return 177;
+				case "istype": return 178;
+				case "istypelate": return 179;
+				case "in_": return 180;
+				case "increment_i": return 192;
+				case "decrement_i": return 193;
+				case "inclocal_i": return 194;
+				case "declocal_i": return 195;
+				case "negate_i": return 196;
+				case "add_i": return 197;
+				case "subtract_i": return 198;
+				case "multiply_i": return 199;
+				case "getlocal_0": return 208;
+				case "getlocal_1": return 209;
+				case "getlocal_2": return 210;
+				case "getlocal_3": return 211;
+				case "setlocal_0": return 212;
+				case "setlocal_1": return 213;
+				case "setlocal_2": return 214;
+				case "setlocal_3": return 215;
+				case "debug": return 239;
+				case "debugline": return 240;
+				case "debugfile": return 241;
+				case "bkptline": return 242;
+				case "timestamp": return 243;
+				default:
+					throw new Error("unknown opcode " + str);
+			}
 		}
 		
 		public static function creatInstruction(forms:uint, abcFile:ABCFile):AbstractInstruction
@@ -91,9 +268,9 @@ package decompiler.tags.doabc.instruction
 				case 77:	return abcFile.elementFactory(Callinterface) as Callinterface;//Undocumented
 				case 78:	return abcFile.elementFactory(Callsupervoid) as Callsupervoid;
 				case 79:	return abcFile.elementFactory(Callpropvoid) as Callpropvoid;
-				case 80:	return abcFile.elementFactory(Sxi_1) as Sxi_1;
-				case 81:	return abcFile.elementFactory(Sxi_8) as Sxi_8;
-				case 82:	return abcFile.elementFactory(Sxi_16) as Sxi_16;
+				case 80:	return abcFile.elementFactory(Sxi1) as Sxi1;
+				case 81:	return abcFile.elementFactory(Sxi8) as Sxi8;
+				case 82:	return abcFile.elementFactory(Sxi16) as Sxi16;
 				case 83:	return abcFile.elementFactory(Applytype) as Applytype;//Undocumented
 //				case 84:
 				case 85:	return abcFile.elementFactory(Newobject) as Newobject;

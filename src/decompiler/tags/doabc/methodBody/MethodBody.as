@@ -1,9 +1,25 @@
 package decompiler.tags.doabc.methodBody
 {
-	import decompiler.tags.doabc.IHasTraits;
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.Reference;
-	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.tags.doabc.ABCFile;
+	import decompiler.tags.doabc.instruction.AbstractInstruction;
+	import decompiler.tags.doabc.instruction.Declocal;
+	import decompiler.tags.doabc.instruction.Declocal_i;
+	import decompiler.tags.doabc.instruction.Getlocal;
+	import decompiler.tags.doabc.instruction.Getlocal_0;
+	import decompiler.tags.doabc.instruction.Getlocal_1;
+	import decompiler.tags.doabc.instruction.Getlocal_2;
+	import decompiler.tags.doabc.instruction.Getlocal_3;
+	import decompiler.tags.doabc.instruction.InstructionFactory;
+	import decompiler.tags.doabc.instruction.Lookupswitch;
+	import decompiler.tags.doabc.instruction.Setlocal;
+	import decompiler.tags.doabc.instruction.Setlocal_0;
+	import decompiler.tags.doabc.instruction.Setlocal_1;
+	import decompiler.tags.doabc.instruction.Setlocal_2;
+	import decompiler.tags.doabc.instruction.Setlocal_3;
+	import decompiler.tags.doabc.method.MethodInfo;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.ReferencedElement;
+	import decompiler.tags.doabc.trait.IHasTraits;
 	import decompiler.tags.doabc.trait.TraitsInfo;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
@@ -44,7 +60,7 @@ package decompiler.tags.doabc.methodBody
 	 * @author ukyohpq
 	 * 
 	 */
-	public class MethodBody extends ReferencedElement implements IReferenceable, IHasTraits
+	public final class MethodBody extends ReferencedElement implements IReferenceable, IHasTraits
 	{
 		private var _method:int;
 
@@ -56,15 +72,29 @@ package decompiler.tags.doabc.methodBody
 		{
 			return _method;
 		}
-
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
+		}
+		
 		/**
 		 * @private
 		 */
 		public function set method(value:int):void
 		{
+			if(_method == value)
+				return;
 			modify();
-			$abcFile.getMethodInfoByIndex(_method).removeReference(this, "method");
+			try{
+				$abcFile.getMethodInfoByIndex(_method).removeReference(this, "method");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_method = value;
+			setLocalByMI();
 			$abcFile.getMethodInfoByIndex(_method).addReference(this, "method");
 		}
 
@@ -84,6 +114,8 @@ package decompiler.tags.doabc.methodBody
 		 */
 		public function set maxStack(value:uint):void
 		{
+			if(_maxStack == value)
+				return;
 			modify();
 			_maxStack = value;
 		}
@@ -103,10 +135,28 @@ package decompiler.tags.doabc.methodBody
 		 */
 		public function set localCount(value:uint):void
 		{
+			if(_localCount == value)
+				return;
 			modify();
 			_localCount = value;
+			if(method)
+				setLocalByMI();
 		}
 
+		/**
+		 * 设置方法签名的时候，要看看签名使用的参数长度，因为参数也会占用本地寄存器的.
+		 * local_0固定是this,如果有参数，则local_1就是参数1，local_2就是参数2...以此类推
+		 * 所以，local_count至少要为方法签名的参数长度+1
+		 * 
+		 */
+		private function setLocalByMI():void
+		{
+			var mi:MethodInfo = $abcFile.getMethodInfoByIndex(_method)
+			var minLocalCount:int = mi.paramTypesArr.length + 1 + mi.needArguments + mi.needRest;
+			if(_localCount < minLocalCount)
+				_localCount = minLocalCount;
+		}
+		
 		private var _initScopeDepth:uint;
 
 		/**
@@ -156,6 +206,11 @@ package decompiler.tags.doabc.methodBody
 		 */
 		public function get methodBodyPCode():MethodBodyPCode
 		{
+			if(!_methodBodyPCode)
+			{
+				_methodBodyPCode = $abcFile.elementFactory(MethodBodyPCode) as MethodBodyPCode;
+				_methodBodyPCode.methodBody = this;
+			}
 			return _methodBodyPCode;
 		}
 
@@ -169,8 +224,16 @@ package decompiler.tags.doabc.methodBody
 		 * The trait array contains all the traits for this method body (see above for more information on traits).
 		 */
 		private var _traitsArray:Vector.<TraitsInfo>;
-		public function MethodBody()
+		public function MethodBody(abc:ABCFile = null)
 		{
+			if(abc)
+			{
+				$abcFile = abc;
+				_methodBodyPCode = $abcFile.elementFactory(MethodBodyPCode) as MethodBodyPCode;
+				_methodBodyPCode.methodBody = this;
+			}
+			_exceptionArray = new Vector.<ExceptionInfo>([]);
+			_traitsArray = new Vector.<TraitsInfo>([]);
 		}
 		
 		override public function decodeFromBytes(byte:ByteArray):void
@@ -197,15 +260,19 @@ package decompiler.tags.doabc.methodBody
 			methodBodyByte.endian = Endian.LITTLE_ENDIAN;
 			byte.readBytes(methodBodyByte, 0, length);
 			methodBodyByte.position = 0;
-			_methodBodyPCode = $abcFile.elementFactory(MethodBodyPCode) as MethodBodyPCode;
-			_methodBodyPCode.methodBody = this;
+			
+			if(!_methodBodyPCode)
+			{
+				_methodBodyPCode = $abcFile.elementFactory(MethodBodyPCode) as MethodBodyPCode;
+				_methodBodyPCode.methodBody = this;
+			}
 			_methodBodyPCode.decodeFromBytes(methodBodyByte);
 			methodBodyByte.clear();
 //			trace("MethodBody code:" + _mbp);
 			
 			//read exception_count
 			length = SWFUtil.readU30(byte);
-			_exceptionArray = new Vector.<ExceptionInfo>(length);
+			_exceptionArray.length = length;
 			for (var i:int = 0; i < length; ++i) 
 			{
 				var ei:ExceptionInfo = $abcFile.elementFactory(ExceptionInfo) as ExceptionInfo;
@@ -215,7 +282,7 @@ package decompiler.tags.doabc.methodBody
 			
 			//read trait_count
 			length = SWFUtil.readU30(byte);
-			_traitsArray = new Vector.<TraitsInfo>(length);
+			_traitsArray.length = length;
 			for (i = 0; i < length; ++i) 
 			{
 				var trait:TraitsInfo = $abcFile.elementFactory(TraitsInfo) as TraitsInfo;
@@ -224,7 +291,62 @@ package decompiler.tags.doabc.methodBody
 				_traitsArray[i] = trait;
 			}
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
+		}
+		
+		public function compile(codeStr:String):void
+		{
+			codeStr = "getlocal_0;pushscope;" + codeStr;
+			insertPCodeStrAt(codeStr, 0);
+		}
+		
+		/**
+		 * 在指定位置加入pcode代码
+		 * @param codeStr
+		 * @param index
+		 * 
+		 */
+		public function insertPCodeStrAt(codeStr:String, index:int):void
+		{
+			codeStr.replace(/\r\n/g, "");
+			codeStr.replace(/ */g, " ");
+			var codes:Array = codeStr.split(";");
+			var length:int = codes.length;
+			var opcodes:Array = [];
+			for (var i:int = 0; i < length; ++i) 
+			{
+				var statement:String = codes[i];
+				if(statement == "")
+					continue;
+				var arr:Array = statement.split(" ");
+				var opcodeName:String = arr[0];
+				var opcode:AbstractInstruction = InstructionFactory.creatInstruction(InstructionFactory.getPCodeFormByStr(opcodeName), $abcFile);
+				switch(opcodeName)
+				{
+					//lookupswitch这个opcode很特殊，是唯一的参数不定长的opcode，编码需要特殊处理
+					case "Lookupswitch":
+						Lookupswitch(opcode).default_offset = arr[1];
+						var len:int = arr.length;
+						for (var j:int = 2; j < len; ++j) 
+						{
+							Lookupswitch(opcode).addCaseOffset(arr[j]);
+						}
+						break;
+					default:
+						var params:Vector.<String> = opcode.getParamNames();
+						if(params)
+						{
+							len = params.length;
+							for (var k:int = 0; k < len; ++k) 
+							{
+								opcode[params[k]] = arr[1 + k];
+							}
+						}
+						break;
+				}
+				opcodes.push(opcode);
+			}
+			methodBodyPCode.insertPCode(index, opcodes);
 		}
 		
 		override public function toXML(name:String = null):SWFXML
@@ -265,12 +387,13 @@ package decompiler.tags.doabc.methodBody
 			var byte:ByteArray = new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
 			SWFUtil.writeU30(byte, _method);
+			
+			var tempBytes:ByteArray = methodBodyPCode.encode();
+			//因为_maxStack这些是methodBodyPCode编译后再决定的，所以，放在后面写入byteArray
 			SWFUtil.writeU30(byte, _maxStack);
 			SWFUtil.writeU30(byte, _localCount);
 			SWFUtil.writeU30(byte, _initScopeDepth);
 			SWFUtil.writeU30(byte, _maxScopeDepth);
-			
-			var tempBytes:ByteArray = _methodBodyPCode.encode();
 			byte.writeBytes(tempBytes);
 			tempBytes.clear();
 			

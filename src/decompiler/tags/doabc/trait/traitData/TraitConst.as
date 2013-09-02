@@ -1,7 +1,7 @@
 package decompiler.tags.doabc.trait.traitData
 {
 	import decompiler.tags.doabc.ABCFile;
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.tags.doabc.cpools.Cpool_info;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
@@ -60,7 +60,12 @@ package decompiler.tags.doabc.trait.traitData
 		public function set typeName(value:uint):void
 		{
 			modify();
-			$abcFile.getMultinameByIndex(_typeName).removeReference(this, "typeName");
+			try{
+				$abcFile.getMultinameByIndex(_typeName).removeReference(this, "typeName");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_typeName = value;
 			$abcFile.getMultinameByIndex(_typeName).addReference(this, "typeName");
 		}
@@ -163,6 +168,9 @@ package decompiler.tags.doabc.trait.traitData
 			$abcFile.getMultinameByIndex(_typeName).addReference(this, "typeName");
 		}
 		
-		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
+		}
 	}
 }

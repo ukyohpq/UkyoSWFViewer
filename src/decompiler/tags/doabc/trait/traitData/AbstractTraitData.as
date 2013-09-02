@@ -1,7 +1,7 @@
 package decompiler.tags.doabc.trait.traitData
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IReferenceable;
+	import decompiler.tags.doabc.reference.IReferenceable;
 	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
@@ -14,8 +14,14 @@ package decompiler.tags.doabc.trait.traitData
 		
 		override public function decodeFromBytes(byte:ByteArray):void
 		{
-			include "../../IReferenced_Fragment_1.as";
+			include "../../reference/IReferenced_Fragment_1.as";
 		}
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../../reference/IReferenceable_Fragment_1.as"
+		}
+		
 		
 		override public function encode():ByteArray
 		{

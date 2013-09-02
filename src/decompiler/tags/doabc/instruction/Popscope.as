@@ -24,6 +24,11 @@ package decompiler.tags.doabc.instruction
 			return "popscope";
 		}
 		
+		override public function deltaNumScope():int
+		{
+			return -1;
+		}
+		
 		
 	}
 }

@@ -24,6 +24,9 @@ package decompiler.tags.doabc.instruction
 			return "pushundefined";
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return 1;
+		}
 	}
 }

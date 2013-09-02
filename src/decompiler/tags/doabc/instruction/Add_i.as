@@ -26,6 +26,9 @@ package decompiler.tags.doabc.instruction
 			return "add_i";
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return -1;
+		}
 	}
 }

@@ -1,6 +1,6 @@
 package decompiler.tags.doabc.cpools.multinames
 {
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -33,7 +33,12 @@ package decompiler.tags.doabc.cpools.multinames
 
 		public function set ns_set(value:int):void
 		{
-			$abcFile.getNsSetByIndex(_ns_set).removeReference(this, "ns_set");
+			try{
+				$abcFile.getNsSetByIndex(_ns_set).removeReference(this, "ns_set");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_ns_set = value;
 			$abcFile.getNsSetByIndex(_ns_set).addReference(this, "ns_set");
 			modify();
@@ -76,6 +81,16 @@ package decompiler.tags.doabc.cpools.multinames
 		override public function creatRefrenceRelationship():void
 		{
 			$abcFile.getNsSetByIndex(_ns_set).addReference(this, "ns_set");
+		}
+		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
+		}
+		
+		override public function needNumParams():int
+		{
+			return 1;
 		}
 	}
 }

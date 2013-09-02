@@ -1,4 +1,4 @@
-package decompiler.tags.doabc
+package decompiler.tags.doabc.reference
 {
 	/**
 	 * doabc中的引用

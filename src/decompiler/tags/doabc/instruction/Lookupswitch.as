@@ -37,23 +37,28 @@ package decompiler.tags.doabc.instruction
 			_default_offset = value;
 		}
 
-		private var _case_offsets:Vector.<uint>;
+		private var _case_offsets:Vector.<int>;
 
-		public function get case_offsets():Vector.<uint>
+		public function get case_offsets():Vector.<int>
 		{
 			return _case_offsets.slice();
 		}
 
-		public function set case_offsets(value:Vector.<uint>):void
+		public function set case_offsets(value:Vector.<int>):void
 		{
 			modify();
 			_case_offsets = value;
 		}
 
+		public function addCaseOffset(offset:int):void
+		{
+			_case_offsets.push(offset);
+		}
+		
 		public function Lookupswitch()
 		{
 			super();
-			_case_offsets = new <uint>[];
+			_case_offsets = new <int>[];
 		}
 		
 		override public function decodeFromBytes(byte:ByteArray):void
@@ -108,11 +113,17 @@ package decompiler.tags.doabc.instruction
 //			return "[lookupswitch]";
 //		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			var vec:Vector.<uint> = new <uint>[_default_offset];
+			var vec:Vector.<int> = new <int>[_default_offset];
 			return vec.concat(_case_offsets);
 		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["default_offset", "case_offsets"];;
+		}
+		
 		
 		override protected function paramsToXML(xml:SWFXML):void
 		{
@@ -126,5 +137,9 @@ package decompiler.tags.doabc.instruction
 			}
 		}
 		
+		override public function deltaNumStack():int
+		{
+			return -1;
+		}
 	}
 }

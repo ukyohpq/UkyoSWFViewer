@@ -1,6 +1,6 @@
 package decompiler.tags.doabc.instruction
 {
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -37,7 +37,12 @@ package decompiler.tags.doabc.instruction
 		public function set index(value:uint):void
 		{
 			modify();
-			$abcFile.getMultinameByIndex(_index).removeReference(this, "index");
+			try{
+				$abcFile.getMultinameByIndex(_index).removeReference(this, "index");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_index = value;
 			$abcFile.getMultinameByIndex(_index).addReference(this, "index");
 		}
@@ -99,15 +104,30 @@ package decompiler.tags.doabc.instruction
 //			return "name:" + $abcFile.getMultinameByIndex(index) + " arg_count:" + arg_count;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[index, arg_count];
+			return new <int>[index, arg_count];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["index", "arg_count"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
 		{
 			xml.appendChild("<index>" + index + "</index>");
 			xml.appendChild("<arg_count>" + arg_count + "</arg_count>");
+		}
+		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../reference/IReferenceable_Fragment_1.as";
+		}
+		
+		override public function deltaNumStack():int
+		{
+			return -(1 + _arg_count + $abcFile.getMultinameByIndex(_index).needNumParams());
 		}
 	}
 }

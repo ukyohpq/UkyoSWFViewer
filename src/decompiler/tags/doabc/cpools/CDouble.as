@@ -1,6 +1,6 @@
 package decompiler.tags.doabc.cpools
 {
-	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.tags.doabc.reference.ReferencedElement;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	

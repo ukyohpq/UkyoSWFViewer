@@ -9,6 +9,12 @@ package decompiler.tags.doabc
 	public class ABCFileElement implements IByteArrayReader, ISWFElement
 	{
 		protected var $abcFile:ABCFile;
+
+		public function get abcFile():ABCFile
+		{
+			return $abcFile;
+		}
+
 		public function ABCFileElement()
 		{
 		}
@@ -28,7 +34,7 @@ package decompiler.tags.doabc
 			return null;
 		}
 		
-		internal function setAbcFile(abcFile:ABCFile):void
+		public function setAbcFile(abcFile:ABCFile):void
 		{
 			$abcFile = abcFile;
 		}

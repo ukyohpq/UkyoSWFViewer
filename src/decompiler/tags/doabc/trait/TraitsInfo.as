@@ -1,8 +1,7 @@
 package decompiler.tags.doabc.trait
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IHasTraits;
-	import decompiler.tags.doabc.IReferenceable;
+	import decompiler.tags.doabc.reference.IReferenceable;
 	import decompiler.tags.doabc.trait.traitData.AbstractTraitData;
 	import decompiler.tags.doabc.trait.traitData.TraitDataFactory;
 	import decompiler.utils.SWFUtil;
@@ -36,7 +35,14 @@ package decompiler.tags.doabc.trait
 		{
 			return _target;
 		}
-
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
+		}
+		
+		
 		public function set target(value:IHasTraits):void
 		{
 			_target = value;
@@ -60,12 +66,22 @@ package decompiler.tags.doabc.trait
 		public function set name(value:uint):void
 		{
 			modify();
-			$abcFile.getMultinameByIndex(_name).removeReference(this, "name");
+			try{
+				$abcFile.getMultinameByIndex(_name).removeReference(this, "name");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_name = value;
 			$abcFile.getMultinameByIndex(_name).addReference(this, "name");
 		}
 
 		private var _data:AbstractTraitData;
+
+		public function set data(value:AbstractTraitData):void
+		{
+			_data = value;
+		}
 
 		/**
 		 * The interpretation of the data field depends on the type of the trait, 
@@ -76,7 +92,6 @@ package decompiler.tags.doabc.trait
 		{
 			return _data;
 		}
-
 		
 		/**
 		 * These fields are present only if ATTR_Metadata is present in the upper four bits of the kind field.
@@ -161,7 +176,7 @@ package decompiler.tags.doabc.trait
 				
 			}
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 		
 		override public function encode():ByteArray

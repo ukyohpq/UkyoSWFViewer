@@ -2,6 +2,11 @@ package decompiler.tags.doabc.instruction
 {
 	import flash.utils.ByteArray;
 
+	/**
+	 * 暂时没用到的类
+	 * @author ukyohpq
+	 * 
+	 */
 	public final class PCodeArray
 	{
 		private var _list:Object;

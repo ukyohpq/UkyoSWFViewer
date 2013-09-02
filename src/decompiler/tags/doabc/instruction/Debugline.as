@@ -71,9 +71,14 @@ package decompiler.tags.doabc.instruction
 			return "linenum:" + _linenum;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_linenum];
+			return new <int>[_linenum];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_linenum"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void

@@ -64,9 +64,14 @@ package decompiler.tags.doabc.instruction
 			return "value:" + _value;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_value];
+			return new <int>[_value];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_value"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
@@ -74,5 +79,9 @@ package decompiler.tags.doabc.instruction
 			xml.appendChild("<value>" + _value + "</value>");
 		}
 		
+		override public function deltaNumStack():int
+		{
+			return 1;
+		}
 	}
 }

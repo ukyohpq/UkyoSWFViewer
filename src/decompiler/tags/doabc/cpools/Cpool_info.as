@@ -1,7 +1,7 @@
 package decompiler.tags.doabc.cpools
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.tags.doabc.reference.ReferencedElement;
 	import decompiler.tags.doabc.cpools.multinames.CGenericName;
 	import decompiler.tags.doabc.cpools.multinames.CMultiname;
 	import decompiler.tags.doabc.cpools.multinames.CMultinameA;
@@ -453,8 +453,8 @@ package decompiler.tags.doabc.cpools
 					break;
 				case CPOOL_TYPE_NS:
 					var ns:CNameSpace = $abcFile.elementFactory(CNameSpace) as CNameSpace;
-					ns.kind = params[0];
-					ns.name = params[1];
+					ns.setProperty("kind", params[0], false);
+					ns.setProperty("name", params[1], false);
 					_namespaceArr.push(ns);
 					break;
 				case CPOOL_TYPE_NSS:
@@ -462,7 +462,7 @@ package decompiler.tags.doabc.cpools
 					var length:int = params.length - 2;
 					for (var i:int = 0; i < length; ++i) 
 					{
-						nss.setValueAt(params[i + 2]);
+						nss.setValueAt(params[i + 2], i, false);
 					}
 					_nsSetArr.push(nss);
 				case CPOOL_TYPE_MN:
@@ -471,35 +471,36 @@ package decompiler.tags.doabc.cpools
 					{
 						case CQName:
 						case CQNameA:
-							mn["ns"] = params[1];
-							mn["name"] = params[2];
+							mn.setProperty("ns", params[1], false);
+							mn.setProperty("name", params[2], false);
 							break;
 						case CRTQName:
 						case CRTQNameA:
-							mn["name"] = params[1];
+							mn.setProperty("name", params[1], false);
 							break;
 						case CRTQNameL:
 						case CRTQNameLA:
 							break;
 						case CMultiname:
 						case CMultinameA:
-							mn["name"] = params[1];
-							mn["ns_set"] = params[2];
+							mn.setProperty("name", params[1], false);
+							mn.setProperty("ns_set", params[2], false);
 							break;
 						case CMultinameL:
 						case CMultinameLA:
-							mn["ns_set"] = params[1];
+							mn.setProperty("ns_set", params[1], false);
 							break;
 						case CGenericName:
-							mn["typeDefinition"] = params[1];
+							mn.setProperty("typeDefinition", params[1], false);
 							length = params.length - 2;
 							for (var j:int = 0; j < length; ++j) 
 							{
-								mn["setValueAt"](params[j + 2]);
+								mn["setValueAt"](params[j + 2], j, false);
 							}
 							break;
 					}
 					_multinameArr.push(mn);
+					break;
 				default:
 					throw new Error("错误的常量类别:" + type);
 			}
@@ -738,6 +739,12 @@ package decompiler.tags.doabc.cpools
 				throw new Error("要删除的常量的索引越界，最大为:" + (vec.length - 1) + ", 实际为:" + index);
 			}else{
 				modify();
+				var length:int = vec.length;
+				for (var i:int = index + 1; i < length; ++i) 
+				{
+					vec[i]
+				}
+				
 				return vec.splice(index, 1)[0];
 			}
 		}
@@ -815,6 +822,11 @@ package decompiler.tags.doabc.cpools
 		public function getNamespaces():Vector.<CNameSpace>
 		{
 			return _namespaceArr.slice();
+		}
+		
+		public function getMultinames():Vector.<SWFMultiname>
+		{
+			return _multinameArr.slice();
 		}
 	}
 }

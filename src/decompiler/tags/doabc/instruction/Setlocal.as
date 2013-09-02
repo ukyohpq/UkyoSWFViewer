@@ -1,8 +1,8 @@
 package decompiler.tags.doabc.instruction
 {
-	import flash.utils.ByteArray;
-	
 	import decompiler.utils.SWFUtil;
+	
+	import flash.utils.ByteArray;
 
 	/**
 	 * Format
@@ -35,7 +35,7 @@ package decompiler.tags.doabc.instruction
 		
 		override public function decodeFromBytes(byte:ByteArray):void
 		{
-			index = SWFUtil.readU30(byte);
+			_index = SWFUtil.readU30(byte);
 			super.decodeFromBytes(byte);
 		}
 		
@@ -54,6 +54,17 @@ package decompiler.tags.doabc.instruction
 			return "setlocal";
 		}
 		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>[ "index" ];
+		}
+		
+		override public function getParams():Vector.<int>
+		{
+			return new <int>[ _index ];
+		}
+		
+		
 //		override public function toString():String
 //		{
 //			return "[ setlocal index:" + index + " ]";
@@ -64,6 +75,9 @@ package decompiler.tags.doabc.instruction
 			return "index:" + index;
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return -1;
+		}
 	}
 }

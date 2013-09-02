@@ -1,6 +1,6 @@
 package decompiler.tags.doabc.cpools.multinames
 {
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -19,7 +19,12 @@ package decompiler.tags.doabc.cpools.multinames
 		public function set name(value:int):void
 		{
 			modify();
-			$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			try{
+				$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_name = value;
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
@@ -57,6 +62,11 @@ package decompiler.tags.doabc.cpools.multinames
 		override public function creatRefrenceRelationship():void
 		{
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
+		}
+		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
 		}
 	}
 }

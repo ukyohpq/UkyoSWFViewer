@@ -65,9 +65,14 @@ package decompiler.tags.doabc.instruction
 			return "arg_count:" + _arg_count;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_arg_count];
+			return new <int>[_arg_count];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_arg_count"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
@@ -75,6 +80,9 @@ package decompiler.tags.doabc.instruction
 			xml.appendChild("<arg_count>" + _arg_count + "</arg_count>");
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return -(_arg_count);
+		}
 	}
 }

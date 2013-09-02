@@ -66,9 +66,14 @@ package decompiler.tags.doabc.instruction
 			return " offset:" + _offset
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_offset];
+			return new <int>[_offset];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_offset"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void

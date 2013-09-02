@@ -1,9 +1,9 @@
 package decompiler.tags.doabc.cpools.namespaces
 {
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.Reference;
-	import decompiler.tags.doabc.ReferencedElement;
 	import decompiler.tags.doabc.events.ABCFileEvent;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.Reference;
+	import decompiler.tags.doabc.reference.ReferencedElement;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -41,7 +41,14 @@ package decompiler.tags.doabc.cpools.namespaces
 			modify();
 			_kind = value;
 		}
-
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../../reference/IReferenceable_Fragment_1.as"
+			
+		}
+		
+		
 		private var _name:uint;
 
 		/**
@@ -60,7 +67,12 @@ package decompiler.tags.doabc.cpools.namespaces
 			if(_name == value)
 				return;
 			modify();
-			$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			try{
+				$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_name = value;
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
@@ -87,7 +99,7 @@ package decompiler.tags.doabc.cpools.namespaces
 		{
 			_kind = byte.readUnsignedByte();
 			_name = SWFUtil.readU30(byte);
-			include "../../IReferenced_Fragment_1.as";
+			include "../../reference/IReferenced_Fragment_1.as";
 		}
 		
 		override public function encode():ByteArray

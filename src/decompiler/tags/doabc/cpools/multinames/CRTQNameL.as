@@ -16,5 +16,10 @@ package decompiler.tags.doabc.cpools.multinames
 		{
 			super(MultinameKind.CONSTANT_RTQNameL);
 		}
+		
+		override public function needNumParams():int
+		{
+			return 2;
+		}
 	}
 }

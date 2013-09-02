@@ -3,7 +3,7 @@ package decompiler.tags.doabc.methodBody
 	import decompiler.core.IByteArrayReader;
 	import decompiler.core.ISWFElement;
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.tags.doabc.reference.ReferencedElement;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	

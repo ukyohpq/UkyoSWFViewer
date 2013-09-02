@@ -1,10 +1,10 @@
 package decompiler.tags.doabc.method
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.Reference;
-	import decompiler.tags.doabc.ReferencedElement;
 	import decompiler.tags.doabc.events.ABCFileEvent;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.Reference;
+	import decompiler.tags.doabc.reference.ReferencedElement;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -52,8 +52,14 @@ package decompiler.tags.doabc.method
 	 * @author ukyohpq
 	 * 
 	 */
-	public class MethodInfo extends ReferencedElement implements IReferenceable
+	public final class MethodInfo extends ReferencedElement implements IReferenceable
 	{
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
+		}
+		
 		private var _returnType:int;
 
 		/**
@@ -65,14 +71,18 @@ package decompiler.tags.doabc.method
 		{
 			return _returnType;
 		}
-
+		
 		/**
 		 * @private
 		 */
 		public function set returnType(value:int):void
 		{
 			modify();
-			$abcFile.getMultinameByIndex(_returnType).removeReference(this, "returnType");
+			try{
+				$abcFile.getMultinameByIndex(_returnType).removeReference(this, "returnType");
+			}catch(err:Error){
+				trace(err);
+			}
 			_returnType = value;
 			$abcFile.getMultinameByIndex(_returnType).addReference(this, "returnType");
 		}
@@ -91,7 +101,12 @@ package decompiler.tags.doabc.method
 				_paramTypesArr.push(value);
 				$abcFile.getMultinameByIndex(value).addReference(this, "paramTypesArr", _paramTypesArr.length - 1);
 			}else{
-				$abcFile.getMultinameByIndex(_paramTypesArr[index]).removeReference(this, "paramTypesArr", index);
+				try{
+					$abcFile.getMultinameByIndex(_paramTypesArr[index]).removeReference(this, "paramTypesArr", index);
+				}catch(err:Error)
+				{
+					trace(err);
+				}
 				_paramTypesArr[index] = value;
 				$abcFile.getMultinameByIndex(value).addReference(this, "paramTypesArr", index);
 			}
@@ -99,11 +114,88 @@ package decompiler.tags.doabc.method
 		}
 		
 		private var _needArguments:Boolean;
+
+		public function get needArguments():Boolean
+		{
+			return _needArguments;
+		}
+
+		public function set needArguments(value:Boolean):void
+		{
+			modify();
+			_needArguments = value;
+		}
+
 		private var _needActivation:Boolean;
+
+		public function get needActivation():Boolean
+		{
+			return _needActivation;
+		}
+
+		public function set needActivation(value:Boolean):void
+		{
+			modify();
+			_needActivation = value;
+		}
+
 		private var _needRest:Boolean;
+
+		public function get needRest():Boolean
+		{
+			return _needRest;
+		}
+
+		public function set needRest(value:Boolean):void
+		{
+			modify();
+			_needRest = value;
+		}
+
 		private var _hasOptional:Boolean;
+
+		/**
+		 * 是否有可选参数(应该是默认参数)
+		 * @return 
+		 * 
+		 */
+		public function get hasOptional():Boolean
+		{
+			return _hasOptional;
+		}
+
+		public function set hasOptional(value:Boolean):void
+		{
+			modify();
+			_hasOptional = value;
+		}
+
 		private var _setDXNS:Boolean;
+
+		public function get setDXNS():Boolean
+		{
+			return _setDXNS;
+		}
+
+		public function set setDXNS(value:Boolean):void
+		{
+			modify();
+			_setDXNS = value;
+		}
+
 		private var _hasParamNames:Boolean;
+
+		public function get hasParamNames():Boolean
+		{
+			return _hasParamNames;
+		}
+
+		public function set hasParamNames(value:Boolean):void
+		{
+			modify();
+			_hasParamNames = value;
+		}
+
 		private var _name:uint;
 
 		/**
@@ -123,7 +215,12 @@ package decompiler.tags.doabc.method
 		public function set name(value:uint):void
 		{
 			modify();
-			$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			try{
+				$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_name = value;
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
@@ -231,7 +328,7 @@ package decompiler.tags.doabc.method
 				}
 			}
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 
 		private function onParseComplete(event:ABCFileEvent):void

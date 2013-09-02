@@ -68,9 +68,14 @@ package decompiler.tags.doabc.instruction
 			return "index:" + _index;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_index];
+			return new <int>[_index];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_index"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void

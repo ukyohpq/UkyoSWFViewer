@@ -24,6 +24,9 @@ package decompiler.tags.doabc.instruction
 			return "getlocal_0";
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return 1;
+		}
 	}
 }

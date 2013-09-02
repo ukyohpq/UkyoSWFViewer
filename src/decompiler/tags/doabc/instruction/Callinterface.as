@@ -49,9 +49,14 @@ package decompiler.tags.doabc.instruction
 			return "name:" + $abcFile.getMultinameByIndex(index);
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[index];
+			return new <int>[index];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["index"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void

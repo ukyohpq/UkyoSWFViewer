@@ -1,6 +1,6 @@
 package decompiler.tags.doabc.cpools.multinames
 {
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -37,13 +37,18 @@ package decompiler.tags.doabc.cpools.multinames
 		{
 			if(_ns == value) return;
 			modify();
-			$abcFile.getNamespaceByIndex(_ns).removeReference(this, "ns");
+			try{
+				$abcFile.getNamespaceByIndex(_ns).removeReference(this, "ns");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_ns = value;
 			$abcFile.getNamespaceByIndex(_ns).addReference(this, "ns");
 		}
 
 		private var _name:int;
-
+		
 		/**
 		 * The ns and name fields are indexes into the namespace and string arrays of the constant_pool entry, respectively.
 		 * A value of zero for the name field indicates the any (“*”) name
@@ -59,7 +64,12 @@ package decompiler.tags.doabc.cpools.multinames
 		{
 			if(_name == value) return;
 			modify();
-			$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			try{
+				$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_name = value;
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
@@ -107,6 +117,11 @@ package decompiler.tags.doabc.cpools.multinames
 		{
 			$abcFile.getNamespaceByIndex(_ns).addReference(this, "ns");
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
+		}
+		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
 		}
 	}
 }

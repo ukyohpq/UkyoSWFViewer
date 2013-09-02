@@ -1,9 +1,9 @@
 package decompiler.tags.doabc.script
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IHasTraits;
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.Reference;
+	import decompiler.tags.doabc.trait.IHasTraits;
 	import decompiler.tags.doabc.trait.TraitsInfo;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
@@ -22,7 +22,7 @@ package decompiler.tags.doabc.script
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ScriptInfo extends ABCFileElement implements IReferenceable, IHasTraits
+	public final class ScriptInfo extends ABCFileElement implements IReferenceable, IHasTraits
 	{
 		private var _init:int;
 
@@ -34,14 +34,26 @@ package decompiler.tags.doabc.script
 		{
 			return _init;
 		}
-
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
+		}
+		
+		
 		/**
 		 * @private
 		 */
 		public function set init(value:int):void
 		{
 			modify();
-			$abcFile.getMethodInfoByIndex(_init).removeReference(this, "init");
+			try{
+				$abcFile.getMethodInfoByIndex(_init).removeReference(this, "init");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_init = value;
 			$abcFile.getMethodInfoByIndex(_init).addReference(this, "init");
 		}
@@ -71,7 +83,7 @@ package decompiler.tags.doabc.script
 				_traitsArray[i] = traitInfo;
 			}
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 		
 		override public function encode():ByteArray

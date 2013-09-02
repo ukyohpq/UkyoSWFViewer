@@ -92,15 +92,25 @@ package decompiler.tags.doabc.instruction
 			return "object_reg:" + _object_reg + " index_reg:" + _index_reg;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_object_reg, _index_reg];
+			return new <int>[_object_reg, _index_reg];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_object_reg", "_index_reg"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
 		{
 			xml.appendChild("<object_reg>" + _object_reg + "</object_reg>");
 			xml.appendChild("<index_reg>" + _index_reg + "</index_reg>");
+		}
+		
+		override public function deltaNumStack():int
+		{
+			return 1;
 		}
 	}
 }

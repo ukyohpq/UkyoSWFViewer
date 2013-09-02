@@ -65,14 +65,24 @@ package decompiler.tags.doabc.instruction
 			return "byte_value:" + _byte_value;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_byte_value];
+			return new <int>[_byte_value];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["byte_value"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
 		{
 			xml.appendChild("<byte_value>" + _byte_value + "</byte_value>");
+		}
+		
+		override public function deltaNumStack():int
+		{
+			return 1;
 		}
 	}
 }

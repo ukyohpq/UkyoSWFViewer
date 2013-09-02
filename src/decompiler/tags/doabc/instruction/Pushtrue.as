@@ -24,6 +24,9 @@ pushtrue
 			return "pushtrue";
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return 1;
+		}
 	}
 }

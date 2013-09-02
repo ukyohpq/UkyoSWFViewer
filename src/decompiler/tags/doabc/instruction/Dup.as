@@ -25,6 +25,9 @@ package decompiler.tags.doabc.instruction
 			return "dup";
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return 1;
+		}
 	}
 }

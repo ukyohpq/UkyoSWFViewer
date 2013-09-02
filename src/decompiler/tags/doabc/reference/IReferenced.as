@@ -1,4 +1,4 @@
-package decompiler.tags.doabc
+package decompiler.tags.doabc.reference
 {
 	/**
 	 * 在abc文件中可以被引用的，例如常量，方法等

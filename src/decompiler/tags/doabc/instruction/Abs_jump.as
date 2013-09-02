@@ -66,11 +66,19 @@ package decompiler.tags.doabc.instruction
 			xml.appendChild("<offset>" + _offset + "</offset>");
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_offset];
+			return new <int>[_offset];
 		}
 		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_offset"];
+		}
 		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../reference/IReferenceable_Fragment_1.as";
+		}
 	}
 }

@@ -31,61 +31,15 @@ package decompiler.tags.doabc.methodBody
 		}
 		
 		/**
-		 * 在指定的索引设置pCode
-		 * @param index	索引位置
-		 * @param form	pCod的form值
-		 * @param params	可选，pCode的参数，如果超出这个pCode实际所需参数个数，后面的将被忽略
-		 * 
-		 */
-		public function setPCodeAt(index:int, form:int, params:Array = null):void
-		{
-			if(params && params.length)
-			{
-				var byte:ByteArray = new ByteArray;
-				var length:int = params.length;
-				for (var i:int = 0; i < length; ++i) 
-				{
-					byte[i] = params[i];
-				}
-			}
-			
-			var pCode:AbstractInstruction = InstructionFactory.creatInstruction(form, $abcFile);
-			pCode.methodBody = methodBody;
-			
-			byte && pCode.decodeFromBytes(byte);
-			
-			if(index < 0 || index >= _pcodes.length)
-			{
-				return;
-			}else{
-				_pcodes[index] = pCode;
-				modify();
-			}
-		}
-		
-		/**
 		 * 向方法体中插入pCode
 		 * @param index	插入的位置
-		 * @param pcodeBytes 要编码的pcode
+		 * @param pcodeBytes 要插入的pcodes
 		 * @return 
 		 * 
 		 */
 		public function insertPCode(index:int, pcodeBytes:Array):void
 		{
-			var byte:ByteArray = new ByteArray;
-			var length:int = pcodeBytes.length;
-			for (var i:int = 0; i < length; ++i) 
-			{
-				byte[i] = pcodeBytes[i];
-			}
-			
-			while(byte.bytesAvailable)
-			{
-				var pCode:AbstractInstruction = InstructionFactory.creatInstruction(byte.readUnsignedByte(), $abcFile);
-				pCode.methodBody = methodBody;
-				pCode.decodeFromBytes(byte);
-				_pcodes.splice(index++, 0, pCode);
-			}
+			_pcodes.splice.apply(null, [index, 0].concat(pcodeBytes));
 		}
 		
 		/**
@@ -126,6 +80,11 @@ package decompiler.tags.doabc.methodBody
 		
 		override public function encode():ByteArray
 		{
+			var localCount:int = 0;
+			var curNumStack:int = 0;
+			var curNumScope:int = 0;
+			var maxStack:int = 0;
+			var maxScope:int = 0;
 			var byte:ByteArray = new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
 			var length:int = _pcodes.length;
@@ -134,10 +93,53 @@ package decompiler.tags.doabc.methodBody
 			var codeBody:ByteArray = new ByteArray;
 			for (var i:int = 0; i < length; ++i) 
 			{
-				var tempBytes:ByteArray = _pcodes[i].encode();
+				var pCode:AbstractInstruction = _pcodes[i];
+				var arr:Vector.<int> = pCode.getParams();
+				var tempBytes:ByteArray = pCode.encode();
 				codeBody.writeBytes(tempBytes);
 				tempBytes.clear();
+				
+				switch(pCode.getName())
+				{
+					case "declocal":
+					case "declocal_i":
+					case "getlocal":
+					case "setlocal":
+						if(localCount < arr[0] + 1)
+							localCount = arr[0] + 1;
+					case "getlocal_3":
+					case "setlocal_3":
+						if(localCount < 4)
+							localCount = 4;
+					case "getlocal_2":
+					case "setlocal_2":
+						if(localCount < 3)
+							localCount = 3;
+					case "getlocal_1":
+					case "setlocal_1":
+						if(localCount < 2)
+							localCount = 2;
+					case "getlocal_0":
+					case "setlocal_0":
+						if(localCount < 1)
+							localCount = 1;
+						break;
+				}
+				curNumStack += pCode.deltaNumStack();
+				curNumScope += pCode.deltaNumScope();
+				if(maxStack < curNumStack)
+					maxStack = curNumStack;
+				if(maxScope < curNumScope)
+					maxScope = curNumScope;
 			}
+			methodBody.initScopeDepth = 0;
+			methodBody.maxScopeDepth = maxScope;
+			//由于有条件分支的情况存在，我这里做的线性检查会不准确，有可能导致计算的结果比之前的还要少
+			//这里先简单处理这种情况，如果计算结果比之前的还少，就用之前的
+			if(methodBody.maxStack < maxStack)
+				methodBody.maxStack = maxStack;
+			if(methodBody.localCount < localCount)
+				methodBody.localCount = localCount;
 			SWFUtil.writeU30(byte, codeBody.length);
 			byte.writeBytes(codeBody);
 			codeBody.clear();
@@ -168,7 +170,7 @@ package decompiler.tags.doabc.methodBody
 				var pCode:AbstractInstruction = _pcodes[i];
 				var tempXML:SWFXML = pCode.toXML("opcode_" + i);
 				tempXML.setAttribute("position", position);
-				var params:Vector.<uint> = pCode.getParams();
+				var params:Vector.<int> = pCode.getParams();
 				position += (params?params.length:0) + 1;//参数长度加上form长度1
 				xml.appendChild(tempXML);
 			}

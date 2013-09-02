@@ -1,7 +1,7 @@
 package decompiler.tags.doabc.instruction
 {
 	import decompiler.tags.doabc.ABCFile;
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -74,14 +74,24 @@ package decompiler.tags.doabc.instruction
 			return "exception:" + methodBody.getExceptionInfoByIndex(_index);
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_index];
+			return new <int>[_index];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_index"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
 		{
 			xml.appendChild("<index>" + _index + "</index>");
+		}
+		
+		override public function deltaNumStack():int
+		{
+			return 1;
 		}
 	}
 }

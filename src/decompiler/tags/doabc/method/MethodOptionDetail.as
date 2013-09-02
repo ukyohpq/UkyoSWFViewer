@@ -1,8 +1,8 @@
 package decompiler.tags.doabc.method
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IReferenceable;
 	import decompiler.tags.doabc.events.ABCFileEvent;
+	import decompiler.tags.doabc.reference.IReferenceable;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -19,10 +19,17 @@ package decompiler.tags.doabc.method
 	 * @author ukyohpq
 	 * 
 	 */
-	public class MethodOptionDetail extends ABCFileElement implements IReferenceable
+	public final class MethodOptionDetail extends ABCFileElement implements IReferenceable
 	{
 		private var _val:int;
-
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
+		}
+		
+		
 		public function get val():int
 		{
 			return _val;
@@ -31,7 +38,12 @@ package decompiler.tags.doabc.method
 		public function set val(value:int):void
 		{
 			modify();
-			$abcFile.removeReferenceByKindAndIndex(_kind, _val, this);
+			try{
+				$abcFile.removeReferenceByKindAndIndex(_kind, _val, this);
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_val = value;
 			$abcFile.addReferenceByKindAndIndex(_kind, _val, this);
 		}
@@ -46,7 +58,12 @@ package decompiler.tags.doabc.method
 		public function set kind(value:int):void
 		{
 			modify();
-			$abcFile.removeReferenceByKindAndIndex(_kind, _val, this);
+			try{
+				$abcFile.removeReferenceByKindAndIndex(_kind, _val, this);
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_kind = value;
 			$abcFile.addReferenceByKindAndIndex(_kind, _val, this);
 		}
@@ -62,7 +79,7 @@ package decompiler.tags.doabc.method
 			_val = SWFUtil.readU30(byte);
 			_kind = byte.readUnsignedByte();
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 
 		private function onParseComplete(event:ABCFileEvent):void

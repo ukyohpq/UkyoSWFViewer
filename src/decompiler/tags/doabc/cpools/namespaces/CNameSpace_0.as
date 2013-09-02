@@ -23,6 +23,9 @@ package decompiler.tags.doabc.cpools.namespaces
 			return "*";
 		}
 		
-		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
+		}
 	}
 }

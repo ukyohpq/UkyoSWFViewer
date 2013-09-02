@@ -27,5 +27,10 @@ package decompiler.tags.doabc.instruction
 		{
 			return "bitxor";
 		}
+		
+		override public function deltaNumStack():int
+		{
+			return -1;
+		}
 	}
 }

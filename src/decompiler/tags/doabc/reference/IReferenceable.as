@@ -1,4 +1,4 @@
-package decompiler.tags.doabc
+package decompiler.tags.doabc.reference
 {
 	/**
 	 * 可以引用别的元素
@@ -12,5 +12,6 @@ package decompiler.tags.doabc
 		 * 
 		 */
 		function creatRefrenceRelationship():void;
+		function setProperty(name:String, value:Object, refreshReference:Boolean = true):void;
 	}
 }

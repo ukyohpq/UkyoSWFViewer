@@ -17,6 +17,9 @@ package decompiler.tags.doabc.instruction
 			return "getglobalscope";
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return 1;
+		}
 	}
 }

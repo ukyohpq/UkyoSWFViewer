@@ -68,14 +68,24 @@ package decompiler.tags.doabc.instruction
 			return "offset:" + offset;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[offset];
+			return new <int>[offset];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["offset"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
 		{
 			xml.appendChild("<offset>" + _offset + "</offset>");
+		}
+		
+		override public function deltaNumStack():int
+		{
+			return -2;
 		}
 	}
 }

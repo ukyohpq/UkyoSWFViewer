@@ -1,11 +1,11 @@
 package decompiler.tags.doabc.cpools
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.IReferenceableArray;
-	import decompiler.tags.doabc.Reference;
-	import decompiler.tags.doabc.ReferencedElement;
 	import decompiler.tags.doabc.events.ABCFileEvent;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.IReferenceableArray;
+	import decompiler.tags.doabc.reference.Reference;
+	import decompiler.tags.doabc.reference.ReferencedElement;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -22,7 +22,7 @@ package decompiler.tags.doabc.cpools
 	 * @author ukyohpq
 	 * 
 	 */
-	public class CNsSet extends ReferencedElement implements IReferenceableArray
+	public final class CNsSet extends ReferencedElement implements IReferenceableArray
 	{
 		private var _nsArr:Vector.<uint>;
 
@@ -31,16 +31,27 @@ package decompiler.tags.doabc.cpools
 			return _nsArr;
 		}
 
-		public function setValueAt(value:uint, index:uint = -1):void
+		public function setValueAt(value:uint, index:uint = -1, refreshReference:Boolean = true):void
 		{
 			if(index < 0 || index >= _nsArr.length)
 			{
 				_nsArr.push(value);
 				$abcFile.getNamespaceByIndex(value).addReference(this, "nsArr", _nsArr.length - 1);
 			}else{
-				$abcFile.getNamespaceByIndex(_nsArr[index]).removeReference(this, "nsArr", index);
-				_nsArr[index] = value;
-				$abcFile.getNamespaceByIndex(value).addReference(this, "nsArr", index);
+				if(refreshReference)
+				{
+					try{
+						$abcFile.getNamespaceByIndex(_nsArr[index]).removeReference(this, "nsArr", index);
+					}catch(err:Error)
+					{
+						trace(err);
+					}
+					_nsArr[index] = value;
+					$abcFile.getNamespaceByIndex(value).addReference(this, "nsArr", index);
+				}else{
+					_nsArr[index] = value;
+				}
+				
 			}
 			modify();
 		}
@@ -79,7 +90,7 @@ package decompiler.tags.doabc.cpools
 				_nsArr[i] = SWFUtil.readU30(byte);
 			}
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 		
 		public function toString():String
@@ -115,6 +126,12 @@ package decompiler.tags.doabc.cpools
 			{
 				$abcFile.getNamespaceByIndex(_nsArr[i]).addReference(this, "nsArr", i);
 			}
+		}
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
 		}
 		
 	}

@@ -1,7 +1,7 @@
 package decompiler.tags.doabc.classAndInstances
 {
-	import decompiler.tags.doabc.IHasTraits;
-	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.tags.doabc.trait.IHasTraits;
+	import decompiler.tags.doabc.reference.ReferencedElement;
 	import decompiler.tags.doabc.trait.TraitsInfo;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;

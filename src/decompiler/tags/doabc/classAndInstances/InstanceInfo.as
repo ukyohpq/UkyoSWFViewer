@@ -1,10 +1,10 @@
 package decompiler.tags.doabc.classAndInstances
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IHasTraits;
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.IReferenceableArray;
-	import decompiler.tags.doabc.ReferencedElement;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.IReferenceableArray;
+	import decompiler.tags.doabc.reference.ReferencedElement;
+	import decompiler.tags.doabc.trait.IHasTraits;
 	import decompiler.tags.doabc.trait.TraitsInfo;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
@@ -28,10 +28,16 @@ package decompiler.tags.doabc.classAndInstances
 	 * @author ukyohpq
 	 * 
 	 */
-	public class InstanceInfo extends ReferencedElement implements IReferenceableArray, IHasTraits
+	public final class InstanceInfo extends ReferencedElement implements IReferenceableArray, IHasTraits
 	{
 		private var _name:int;
-
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../reference/IReferenceable_Fragment_1.as";
+		}
+		
+		
 		/**
 		 *The name field is an index into the multiname array of the constant pool; it provides a name for the
 class. The entry specified must be a QName. 
@@ -47,7 +53,12 @@ class. The entry specified must be a QName.
 		{
 			if(_name == value) return;
 			modify();
-			$abcFile.getMultinameByIndex(_name).removeReference(this, "name");
+			try{
+				$abcFile.getMultinameByIndex(_name).removeReference(this, "name");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_name = value;
 			$abcFile.getMultinameByIndex(_name).addReference(this, "name");
 		}
@@ -69,7 +80,12 @@ the base class of this class, if any. A value of zero indicates that this class 
 		{
 			if(_superName == value) return;
 			modify();
-			$abcFile.getMultinameByIndex(_superName).removeReference(this, "superName");
+			try{
+				$abcFile.getMultinameByIndex(_superName).removeReference(this, "superName");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_superName = value;
 			$abcFile.getMultinameByIndex(_superName).addReference(this, "superName");
 		}
@@ -311,7 +327,7 @@ an object of this class is constructed. This method is sometimes referred to as 
 				_traitsArray[i] = traitsInfo;
 			}
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 		
 		public function creatRefrenceRelationship():void
@@ -326,16 +342,26 @@ an object of this class is constructed. This method is sometimes referred to as 
 			}
 		}
 		
-		public function setValueAt(value:uint, index:uint=-1):void
+		public function setValueAt(value:uint, index:uint=-1, refreshReference:Boolean = true):void
 		{
 			if(index < 0 || index >= _interfaceVec.length)
 			{
 				_interfaceVec.push(value);
 				$abcFile.getNamespaceByIndex(value).addReference(this, "interfaceVec", _interfaceVec.length - 1);
 			}else{
-				$abcFile.getNamespaceByIndex(_interfaceVec[index]).removeReference(this, "interfaceVec", index);
-				_interfaceVec[index] = value;
-				$abcFile.getNamespaceByIndex(value).addReference(this, "interfaceVec", index);
+				if(refreshReference)
+				{
+					try{
+						$abcFile.getNamespaceByIndex(_interfaceVec[index]).removeReference(this, "interfaceVec", index);
+					}catch(err:Error)
+					{
+						trace(err);
+					}
+					_interfaceVec[index] = value;
+					$abcFile.getNamespaceByIndex(value).addReference(this, "interfaceVec", index);
+				}else{
+					_interfaceVec[index] = value;
+				}
 			}
 			modify();
 		}
@@ -343,7 +369,7 @@ an object of this class is constructed. This method is sometimes referred to as 
 		override public function toXML(name:String = null):SWFXML
 		{
 			if(!name) name = "InstanceInfo";
-			var xml:SWFXML = new SWFXML("InstanceInfo");
+			var xml:SWFXML = new SWFXML(name);
 			xml.setAttribute("name", "mn(" + _name + ")");
 			xml.setAttribute("superName", "mn(" + _superName + ")");
 			xml.setAttribute("isSealed", Boolean(_isSealed));
@@ -389,12 +415,14 @@ an object of this class is constructed. This method is sometimes referred to as 
 		
 		public function addTrait(trait:TraitsInfo):void
 		{
+			trait.target = this;
 			_traitsArray.push(trait);
 			modify();
 		}
 		
 		public function addTraitAt(trait:TraitsInfo, index:int):void
 		{
+			trait.target = this;
 			_traitsArray.splice(index, 0, trait);
 			modify();
 		}

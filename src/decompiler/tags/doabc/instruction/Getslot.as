@@ -72,9 +72,14 @@ package decompiler.tags.doabc.instruction
 			return "slotindex:" + _slotindex;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_slotindex];
+			return new <int>[_slotindex];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_slotindex"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void

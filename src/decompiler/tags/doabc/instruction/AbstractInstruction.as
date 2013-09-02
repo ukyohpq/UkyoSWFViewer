@@ -2,8 +2,8 @@ package decompiler.tags.doabc.instruction
 {
 	import decompiler.tags.doabc.ABCFile;
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IReferenceable;
 	import decompiler.tags.doabc.methodBody.MethodBody;
+	import decompiler.tags.doabc.reference.IReferenceable;
 	import decompiler.utils.SWFXML;
 	
 	import flash.utils.ByteArray;
@@ -16,6 +16,13 @@ package decompiler.tags.doabc.instruction
 		{
 			super();
 		}
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
+		}
+		
 		
 		public function creatRefrenceRelationship():void
 		{
@@ -30,7 +37,7 @@ package decompiler.tags.doabc.instruction
 		
 		override public function decodeFromBytes(byte:ByteArray):void
 		{
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 		
 		
@@ -81,7 +88,7 @@ package decompiler.tags.doabc.instruction
 		private function toHex():String
 		{
 			var str:String = getForm().toString(16);
-			var vec:Vector.<uint> = getParams();
+			var vec:Vector.<int> = getParams();
 			if(!vec) return str;
 			var length:int = vec.length;
 			for (var i:int = 0; i < length; ++i) 
@@ -98,7 +105,12 @@ package decompiler.tags.doabc.instruction
 			return str;
 		}
 		
-		public function getParams():Vector.<uint>
+		public function getParams():Vector.<int>
+		{
+			return null;
+		}
+		
+		public function getParamNames():Vector.<String>
 		{
 			return null;
 		}
@@ -106,8 +118,8 @@ package decompiler.tags.doabc.instruction
 		public function equal(pCode:AbstractInstruction):Boolean
 		{
 			if(getForm() != pCode.getForm()) return false;
-			var params1:Vector.<uint> = getParams();
-			var params2:Vector.<uint> = pCode.getParams();
+			var params1:Vector.<int> = getParams();
+			var params2:Vector.<int> = pCode.getParams();
 			var length:int = getParams().length;
 			for (var i:int = 0; i < length; ++i) 
 			{
@@ -116,6 +128,26 @@ package decompiler.tags.doabc.instruction
 			}
 			
 			return true;
+		}
+		
+		/**
+		 * 该opcode造成的stack改变量
+		 * @return 
+		 * 
+		 */
+		public function deltaNumStack():int
+		{
+			return 0;
+		}
+		
+		/**
+		 * 该opcode造成的scope改变量
+		 * @return 
+		 * 
+		 */
+		public function deltaNumScope():int
+		{
+			return 0;
 		}
 	}
 }

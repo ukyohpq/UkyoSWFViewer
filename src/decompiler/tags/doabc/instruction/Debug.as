@@ -1,7 +1,7 @@
 package decompiler.tags.doabc.instruction
 {
 	import decompiler.tags.doabc.ABCFile;
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -60,7 +60,12 @@ package decompiler.tags.doabc.instruction
 		public function set index(value:uint):void
 		{
 			modify();
-			$abcFile.getStringByIndex(_index).removeReference(this, "index");
+			try{
+				$abcFile.getStringByIndex(_index).removeReference(this, "index");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_index = value;
 			$abcFile.getStringByIndex(_index).addReference(this, "index");
 		}
@@ -148,9 +153,14 @@ package decompiler.tags.doabc.instruction
 			" extra:" + _extra;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_debug_type, _index, _reg, _extra];
+			return new <int>[_debug_type, _index, _reg, _extra];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_debug_type, _index, _reg, _extra"];
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
@@ -161,5 +171,9 @@ package decompiler.tags.doabc.instruction
 			xml.appendChild("<extra>" + _extra + "</extra>");
 		}
 		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../reference/IReferenceable_Fragment_1.as";
+		}
 	}
 }

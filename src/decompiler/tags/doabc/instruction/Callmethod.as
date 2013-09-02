@@ -1,6 +1,5 @@
 package decompiler.tags.doabc.instruction
 {
-	import decompiler.tags.doabc.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -32,7 +31,12 @@ package decompiler.tags.doabc.instruction
 		public function set index(value:uint):void
 		{
 			modify();
-			$abcFile.getMethodInfoByIndex(_index).removeReference(this, "index");
+			try{
+				$abcFile.getMethodInfoByIndex(_index).removeReference(this, "index");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_index = value;
 			$abcFile.getMethodInfoByIndex(_index).addReference(this, "index");
 		}
@@ -95,9 +99,19 @@ package decompiler.tags.doabc.instruction
 			return "method:" + $abcFile.getMethodBodyByIndex(_index) + " arg_count:" + arg_count;
 		}
 		
-		override public function getParams():Vector.<uint>
+		override public function getParams():Vector.<int>
 		{
-			return new <uint>[_index, _arg_count];
+			return new <int>[_index, _arg_count];
+		}
+		
+		override public function getParamNames():Vector.<String>
+		{
+			return new <String>["_index", "_arg_count"];
+		}
+		
+		override public function deltaNumStack():int
+		{
+			return -_arg_count;
 		}
 		
 		override protected function paramsToXML(xml:SWFXML):void
@@ -106,6 +120,9 @@ package decompiler.tags.doabc.instruction
 			xml.appendChild("<arg_count>" + _arg_count + "</arg_count>");
 		}
 		
-		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../reference/IReferenceable_Fragment_1.as";
+		}
 	}
 }

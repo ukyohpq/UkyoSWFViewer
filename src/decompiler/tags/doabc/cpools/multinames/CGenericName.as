@@ -1,7 +1,7 @@
 package decompiler.tags.doabc.cpools.multinames
 {
-	import decompiler.tags.doabc.IReferenceableArray;
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.IReferenceableArray;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -30,7 +30,12 @@ package decompiler.tags.doabc.cpools.multinames
 		public function set typeDefinition(value:int):void
 		{
 			modify();
-			$abcFile.getMultinameByIndex(_typeDefinition).removeReference(this, "typeDefinition");
+			try{
+				$abcFile.getMultinameByIndex(_typeDefinition).removeReference(this, "typeDefinition");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_typeDefinition = value;
 			$abcFile.getMultinameByIndex(_typeDefinition).addReference(this, "typeDefinition");
 		}
@@ -48,16 +53,25 @@ package decompiler.tags.doabc.cpools.multinames
 			return _params.slice();
 		}
 
-		public function setValueAt(value:uint, index:uint = -1):void
+		public function setValueAt(value:uint, index:uint = -1, refreshReference:Boolean = true):void
 		{
 			if(index < 0 || index >= _params.length)
 			{
 				_params.push(value);
 				$abcFile.getMultinameByIndex(value).addReference(this, "params", _params.length - 1);
 			}else{
-				$abcFile.getMultinameByIndex(_params[index]).removeReference(this, "params", index);
-				_params[index] = value;
-				$abcFile.getMultinameByIndex(value).addReference(this, "params", index);
+				if(refreshReference)
+				{
+					try{
+						$abcFile.getMultinameByIndex(_params[index]).removeReference(this, "params", index);
+					}catch(err:Error)
+					{
+						trace(err);
+					}
+					$abcFile.getMultinameByIndex(value).addReference(this, "params", index);
+				}else{
+					_params[index] = value;
+				}
 			}
 			
 			modify();
@@ -140,6 +154,11 @@ package decompiler.tags.doabc.cpools.multinames
 				$abcFile.getMultinameByIndex(_params[i]).addReference(this, "params", i);
 			}
 			
+		}
+		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
 		}
 	}
 }

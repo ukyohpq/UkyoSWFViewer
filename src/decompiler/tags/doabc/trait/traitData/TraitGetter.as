@@ -1,6 +1,6 @@
 package decompiler.tags.doabc.trait.traitData
 {
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -55,7 +55,12 @@ package decompiler.tags.doabc.trait.traitData
 		public function set method(value:uint):void
 		{
 			modify();
-			$abcFile.getMethodInfoByIndex(_method).removeReference(this, "method");
+			try{
+				$abcFile.getMethodInfoByIndex(_method).removeReference(this, "method");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_method = value;
 			$abcFile.getMethodInfoByIndex(_method).addReference(this, "method");
 		}
@@ -96,6 +101,9 @@ package decompiler.tags.doabc.trait.traitData
 			$abcFile.getMethodInfoByIndex(_method).addReference(this, "method");
 		}
 		
-		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
+		}
 	}
 }

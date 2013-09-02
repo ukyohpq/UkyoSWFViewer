@@ -1,6 +1,6 @@
 package decompiler.tags.doabc.trait.traitData
 {
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -36,7 +36,12 @@ package decompiler.tags.doabc.trait.traitData
 		public function set slotID(value:uint):void
 		{
 			modify();
-			$abcFile.getClassInfoByIndex(_classi).removeReference(this, "classi");
+			try{
+				$abcFile.getClassInfoByIndex(_classi).removeReference(this, "classi");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_slotID = value;
 			$abcFile.getClassInfoByIndex(_classi).addReference(this, "classi");
 		}
@@ -97,5 +102,9 @@ package decompiler.tags.doabc.trait.traitData
 			$abcFile.getClassInfoByIndex(_classi).addReference(this, "classi");
 		}
 		
+		override public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			include "../../reference/IReferenceable_Fragment_1.as";
+		}
 	}
 }

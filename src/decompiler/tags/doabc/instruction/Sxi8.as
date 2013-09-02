@@ -10,9 +10,9 @@ package decompiler.tags.doabc.instruction
 	 * @author ukyohpq
 	 * 
 	 */
-	public class Sxi_8 extends AbstractInstruction
+	public class Sxi8 extends AbstractInstruction
 	{
-		public function Sxi_8()
+		public function Sxi8()
 		{
 			super();
 		}

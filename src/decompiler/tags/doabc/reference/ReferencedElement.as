@@ -1,5 +1,7 @@
-package decompiler.tags.doabc
+package decompiler.tags.doabc.reference
 {
+	import decompiler.tags.doabc.ABCFileElement;
+
 	/**
 	 * 可被引用的元素
 	 * @author ukyohpq

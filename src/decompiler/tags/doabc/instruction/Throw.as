@@ -32,6 +32,9 @@ package decompiler.tags.doabc.instruction
 			return "throw";
 		}
 		
-		
+		override public function deltaNumStack():int
+		{
+			return -1;
+		}
 	}
 }

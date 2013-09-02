@@ -16,5 +16,10 @@ package decompiler.tags.doabc.instruction
 		{
 			return "greaterthan";
 		}
+		
+		override public function deltaNumStack():int
+		{
+			return -1;
+		}
 	}
 }

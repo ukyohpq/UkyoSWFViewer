@@ -24,6 +24,16 @@ package decompiler.tags.doabc.instruction
 			return "pushscope";
 		}
 		
+		override public function deltaNumStack():int
+		{
+			return -1;
+		}
+		
+		override public function deltaNumScope():int
+		{
+			return 1;
+		}
+		
 		
 	}
 }

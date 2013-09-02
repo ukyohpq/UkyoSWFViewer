@@ -1,8 +1,8 @@
 package decompiler.tags.doabc.metadata
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -22,7 +22,7 @@ item_count denotes the number of items that follow in the items array.
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ABCMetadata extends ABCFileElement implements IReferenceable
+	public final class ABCMetadata extends ABCFileElement implements IReferenceable
 	{
 		private var _name:uint;
 
@@ -34,7 +34,12 @@ item_count denotes the number of items that follow in the items array.
 		public function set name(value:uint):void
 		{
 			modify();
-			$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			try{
+				$abcFile.getStringByIndex(_name).removeReference(this, "name");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_name = value;
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
 		}
@@ -99,7 +104,7 @@ item_count denotes the number of items that follow in the items array.
 				_itemArr[i] = mi;
 			}
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 		
 		public function toString():String
@@ -110,6 +115,12 @@ item_count denotes the number of items that follow in the items array.
 		public function creatRefrenceRelationship():void
 		{
 			$abcFile.getStringByIndex(_name).addReference(this, "name");
+		}
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
 		}
 		
 	}

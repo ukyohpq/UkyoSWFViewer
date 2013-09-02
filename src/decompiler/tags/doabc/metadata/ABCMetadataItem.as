@@ -1,8 +1,8 @@
 package decompiler.tags.doabc.metadata
 {
 	import decompiler.tags.doabc.ABCFileElement;
-	import decompiler.tags.doabc.IReferenceable;
-	import decompiler.tags.doabc.Reference;
+	import decompiler.tags.doabc.reference.IReferenceable;
+	import decompiler.tags.doabc.reference.Reference;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -20,7 +20,7 @@ string table of the constant pool. If the value of key is zero, this is a keyles
 	 * @author ukyohpq
 	 * 
 	 */
-	public class ABCMetadataItem extends ABCFileElement implements IReferenceable
+	public final class ABCMetadataItem extends ABCFileElement implements IReferenceable
 	{
 		private var _key:int;
 
@@ -32,7 +32,12 @@ string table of the constant pool. If the value of key is zero, this is a keyles
 		public function set key(value:int):void
 		{
 			modify();
-			$abcFile.getStringByIndex(_key).removeReference(this, "key");
+			try{
+				$abcFile.getStringByIndex(_key).removeReference(this, "key");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_key = value;
 			$abcFile.getStringByIndex(_key).addReference(this, "key");
 		}
@@ -47,7 +52,12 @@ string table of the constant pool. If the value of key is zero, this is a keyles
 		public function set value(value:int):void
 		{
 			modify();
-			$abcFile.getStringByIndex(_value).removeReference(this, "value");
+			try{
+				$abcFile.getStringByIndex(_value).removeReference(this, "value");
+			}catch(err:Error)
+			{
+				trace(err);
+			}
 			_value = value;
 			$abcFile.getStringByIndex(_value).addReference(this, "value");
 		}
@@ -72,7 +82,7 @@ string table of the constant pool. If the value of key is zero, this is a keyles
 			_key = SWFUtil.readU30(byte);
 			_value = SWFUtil.readU30(byte);
 			
-			include "../IReferenced_Fragment_1.as";
+			include "../reference/IReferenced_Fragment_1.as";
 		}
 		
 		public function creatRefrenceRelationship():void
@@ -90,6 +100,12 @@ string table of the constant pool. If the value of key is zero, this is a keyles
 			return xml;
 		}
 		
+		
+		public function setProperty(name:String, value:Object, refreshReference:Boolean=true):void
+		{
+			 include "../reference/IReferenceable_Fragment_1.as"
+			
+		}
 		
 	}
 }
