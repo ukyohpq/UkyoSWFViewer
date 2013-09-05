@@ -1,6 +1,22 @@
 package decompiler.tags.doabc.instruction
 {
 	import decompiler.tags.doabc.ABCFile;
+	import decompiler.tags.doabc.instruction.jump.Abs_jump;
+	import decompiler.tags.doabc.instruction.jump.Ifeq;
+	import decompiler.tags.doabc.instruction.jump.Iffalse;
+	import decompiler.tags.doabc.instruction.jump.Ifge;
+	import decompiler.tags.doabc.instruction.jump.Ifgt;
+	import decompiler.tags.doabc.instruction.jump.Ifle;
+	import decompiler.tags.doabc.instruction.jump.Iflt;
+	import decompiler.tags.doabc.instruction.jump.Ifne;
+	import decompiler.tags.doabc.instruction.jump.Ifnge;
+	import decompiler.tags.doabc.instruction.jump.Ifngt;
+	import decompiler.tags.doabc.instruction.jump.Ifnle;
+	import decompiler.tags.doabc.instruction.jump.Ifnlt;
+	import decompiler.tags.doabc.instruction.jump.Ifstricteq;
+	import decompiler.tags.doabc.instruction.jump.Ifstrictne;
+	import decompiler.tags.doabc.instruction.jump.Iftrue;
+	import decompiler.tags.doabc.instruction.jump.Jump;
 
 	public final class InstructionFactory
 	{
@@ -16,7 +32,7 @@ package decompiler.tags.doabc.instruction
 			{
 				case "bkpt": return 1;
 				case "nop": return 2;
-				case "throw_": return 3;
+				case "throw": return 3;
 				case "getsuper": return 4;
 				case "setsuper": return 5;
 				case "dxns": return 6;
@@ -45,6 +61,7 @@ package decompiler.tags.doabc.instruction
 				case "hasnext": return 31;
 				case "pushnull": return 32;
 				case "pushundefined": return 33;
+				case "pushconstant": return 34;
 				case "nextvalue": return 35;
 				case "pushbyte": return 36;
 				case "pushshort": return 37;
@@ -61,6 +78,7 @@ package decompiler.tags.doabc.instruction
 				case "pushscope": return 48;
 				case "pushnamespace": return 49;
 				case "hasnext2": return 50;
+				case "pushdecimal": return 51;
 				case "li8": return 53;
 				case "li16": return 54;
 				case "li32": return 55;
@@ -82,7 +100,9 @@ package decompiler.tags.doabc.instruction
 				case "returnvalue": return 72;
 				case "constructsuper": return 73;
 				case "constructprop": return 74;
+				case "callsuperid": return 75;
 				case "callproplex": return 76;
+				case "callinterface": return 77;
 				case "callsupervoid": return 78;
 				case "callpropvoid": return 79;
 				case "sxi1": return 80;
@@ -105,8 +125,10 @@ package decompiler.tags.doabc.instruction
 				case "getglobalscope": return 100;
 				case "getscopeobject": return 101;
 				case "getproperty": return 102;
+				case "getouterscope": return 103;
 				case "initproperty": return 104;
 				case "deleteproperty": return 106;
+				case "deletepropertylate": return 107;
 				case "getslot": return 108;
 				case "setslot": return 109;
 				case "getglobalslot": return 110;
@@ -138,6 +160,8 @@ package decompiler.tags.doabc.instruction
 				case "typeof_": return 149;
 				case "not": return 150;
 				case "bitnot": return 151;
+				case "concat": return 154;
+				case "add_d": return 155;
 				case "add": return 160;
 				case "subtract": return 161;
 				case "multiply": return 162;
@@ -180,6 +204,7 @@ package decompiler.tags.doabc.instruction
 				case "debugfile": return 241;
 				case "bkptline": return 242;
 				case "timestamp": return 243;
+				case "verifypass": return 245;
 				default:
 					throw new Error("unknown opcode " + str);
 			}

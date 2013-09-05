@@ -34,10 +34,9 @@ package decompiler.tags.doabc.instruction
 			super();
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_index = SWFUtil.readU30(byte);
-			super.decodeFromBytes(byte);
 		}
 		
 		//此opcode是一个文档未记载的opcode，猜这个index是Multiname常量池的索引

@@ -4,6 +4,8 @@ package decompiler.tags.doabc.methodBody
 	import decompiler.tags.doabc.ABCFileElement;
 	import decompiler.tags.doabc.instruction.AbstractInstruction;
 	import decompiler.tags.doabc.instruction.InstructionFactory;
+	import decompiler.tags.doabc.instruction.Lookupswitch;
+	import decompiler.tags.doabc.instruction.jump.IJump;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -31,17 +33,75 @@ package decompiler.tags.doabc.methodBody
 		}
 		
 		/**
-		 * 向方法体中插入pCode
-		 * @param index	插入的位置
+		 * 向方法体中插入pCode。该方法只能将新代码插入到pcode与pcode之间，而不能将代码插入到某个pcode中间。
+		 * 其实向某pcode中间插入代码会导致很多不可预料的错误，因此也没必要做到这一点，通常会修改pcode而不是插入代码到pcode中。
+		 * @param index	插入的位置，一个pcodes的索引
 		 * @param pcodeBytes 要插入的pcodes
+		 * @param pcodeByteLength 要插入的pcodes的字节长度
 		 * @return 
 		 * 
 		 */
-		public function insertPCode(index:int, pcodeBytes:Array):void
+		public function insertPCode(index:int, pcodeBytes:Array, pcodeByteLength:int):void
 		{
+			var length:int = _pcodes.length;
+			for (var i:int = 0; i < length; ++i) 
+			{
+				var pcode:IJump = _pcodes[i] as IJump;
+				//仅处理含有跳转的语句
+				//需要修改跳转偏移量的充要条件是:
+				//1.跳转方向和插入位置匹配
+				//2.当前跳转pcode和插入处pcode之间的所有原始pcode的字节长度总和要不大于原始偏移量
+				//例如，索引3是一跳转pcode，其offset是10bytes，而要在索引7的位置插入新pcode,
+				//而从索引3到索引7之间的索引4,5,6的pcode，它们的字节总长为15，那么，从索引3跳10byte,
+				//是到不了索引7处的，即是说，在索引7出插入的新的pcode，并不影响该跳转，故不需要修改该跳转的offset
+				
+				//index <= i表示原始pcode在新插入的pcode之前，
+				//这些pcode里如果有向上跳转(offset < 0)，则跳转方向和插入位置匹配
+				//而index > i表示原始pcode在新插入的pcode之后，
+				//这些pcode里如果有向下跳转(offset > 0), 则跳转方向和插入位置匹配
+				if(pcode)
+				{
+					//从索引index处到索引i处之间的原始pcode的字节长度总和
+					//用来判断在跳转方向和插入位置匹配的情况下，是否需要修改偏移量
+					var bytesLengthBetweenIndexAndI:int = 0;
+					if(index <= i)
+					{
+						//前插比后插要多一个元素，例如，5,6,7,8,9,10，10是跳转，
+						//在5处插入，实际上，原始的5在新的pcode和10之间，计算字节长时要包含进来
+						//而如果5,6,7,8,9,10，5是跳转，在10出插入，而原始的10，就在5和新的pcode之外，
+						//计算字节长时不包含进来，所以这两个for循环，前跳是开区间，后跳是闭区间
+						for (var j:int = index; j < i; ++j) //闭区间
+						{
+							bytesLengthBetweenIndexAndI += _pcodes[j].getBytesLength();
+						}
+					}else{
+						for (j = i + 1; j < index; ++j) //开区间
+						{
+							bytesLengthBetweenIndexAndI += _pcodes[j].getBytesLength();
+						}
+					}
+					pcode.modifyOffset(pcodeByteLength, index > i, bytesLengthBetweenIndexAndI);
+				}
+			}
+			
 			_pcodes.splice.apply(null, [index, 0].concat(pcodeBytes));
 		}
 		
+		/**
+		 * 获取指定的索引处的pcode之前的pcode的字节长度总和
+		 * @param index	该索引前的所有pcode都将参与计算
+		 * @return 
+		 * 
+		 */
+		public function getCodeByteLengthBefore(index:int):int
+		{
+			var len:int = 0;
+			for (var i:int = 0; i < index; ++i) 
+			{
+				len += _pcodes[i].getBytesLength();
+			}
+			return len;
+		}
 		/**
 		 * 从指定位置删除指定长度的pcode
 		 * @param startIndex
@@ -80,11 +140,6 @@ package decompiler.tags.doabc.methodBody
 		
 		override public function encode():ByteArray
 		{
-			var localCount:int = 0;
-			var curNumStack:int = 0;
-			var curNumScope:int = 0;
-			var maxStack:int = 0;
-			var maxScope:int = 0;
 			var byte:ByteArray = new ByteArray;
 			byte.endian = Endian.LITTLE_ENDIAN;
 			var length:int = _pcodes.length;
@@ -99,47 +154,7 @@ package decompiler.tags.doabc.methodBody
 				codeBody.writeBytes(tempBytes);
 				tempBytes.clear();
 				
-				switch(pCode.getName())
-				{
-					case "declocal":
-					case "declocal_i":
-					case "getlocal":
-					case "setlocal":
-						if(localCount < arr[0] + 1)
-							localCount = arr[0] + 1;
-					case "getlocal_3":
-					case "setlocal_3":
-						if(localCount < 4)
-							localCount = 4;
-					case "getlocal_2":
-					case "setlocal_2":
-						if(localCount < 3)
-							localCount = 3;
-					case "getlocal_1":
-					case "setlocal_1":
-						if(localCount < 2)
-							localCount = 2;
-					case "getlocal_0":
-					case "setlocal_0":
-						if(localCount < 1)
-							localCount = 1;
-						break;
-				}
-				curNumStack += pCode.deltaNumStack();
-				curNumScope += pCode.deltaNumScope();
-				if(maxStack < curNumStack)
-					maxStack = curNumStack;
-				if(maxScope < curNumScope)
-					maxScope = curNumScope;
 			}
-			methodBody.initScopeDepth = 0;
-			methodBody.maxScopeDepth = maxScope;
-			//由于有条件分支的情况存在，我这里做的线性检查会不准确，有可能导致计算的结果比之前的还要少
-			//这里先简单处理这种情况，如果计算结果比之前的还少，就用之前的
-			if(methodBody.maxStack < maxStack)
-				methodBody.maxStack = maxStack;
-			if(methodBody.localCount < localCount)
-				methodBody.localCount = localCount;
 			SWFUtil.writeU30(byte, codeBody.length);
 			byte.writeBytes(codeBody);
 			codeBody.clear();

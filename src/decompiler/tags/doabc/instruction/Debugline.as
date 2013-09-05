@@ -51,10 +51,12 @@ package decompiler.tags.doabc.instruction
 			return "debugline";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_linenum = SWFUtil.readU30(byte);
 		}
+		
+		
 		
 		override protected function encodeBody(byte:ByteArray):void
 		{

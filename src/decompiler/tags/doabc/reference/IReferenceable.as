@@ -12,6 +12,14 @@ package decompiler.tags.doabc.reference
 		 * 
 		 */
 		function creatRefrenceRelationship():void;
+		/**
+		 * 设置属性值
+		 * 这个接口将废弃
+		 * @param name	要设置的属性名
+		 * @param value	要设置的值
+		 * @param refreshReference	是否调整引用
+		 * 
+		 */
 		function setProperty(name:String, value:Object, refreshReference:Boolean = true):void;
 	}
 }

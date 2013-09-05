@@ -1,5 +1,6 @@
 package decompiler.tags.doabc.instruction
 {
+	import decompiler.tags.doabc.instruction.jump.IJump;
 	import decompiler.utils.SWFUtil;
 	import decompiler.utils.SWFXML;
 	
@@ -19,10 +20,11 @@ package decompiler.tags.doabc.instruction
 		Otherwise the target is calculated by adding the case_offset at position index to the base
 		location. Execution continues from the target location.
 		The base location is the address of the lookupswitch instruction itself.
+	 * lookupswith和别的流程控制语句不同，它的偏移量的起点是语句本身，而别的是下一条一句。参看文档p82~p83
 	 * @author ukyohpq
 	 * 
 	 */
-	public class Lookupswitch extends AbstractInstruction
+	public class Lookupswitch extends AbstractInstruction implements IJump
 	{
 		private var _default_offset:int;
 
@@ -33,8 +35,11 @@ package decompiler.tags.doabc.instruction
 
 		public function set default_offset(value:int):void
 		{
-			modify();
-			_default_offset = value;
+			if(_default_offset != value)
+			{
+				modify();
+				_default_offset = value;
+			}
 		}
 
 		private var _case_offsets:Vector.<int>;
@@ -44,15 +49,31 @@ package decompiler.tags.doabc.instruction
 			return _case_offsets.slice();
 		}
 
-		public function set case_offsets(value:Vector.<int>):void
-		{
-			modify();
-			_case_offsets = value;
-		}
-
 		public function addCaseOffset(offset:int):void
 		{
 			_case_offsets.push(offset);
+		}
+		
+		public function modifyOffset(deltaOffset:int, isAfter:Boolean, bytesLengthBetweenCurrentIndexAndInsertIndex:uint):void
+		{
+			if(_default_offset < 0 && !isAfter && (bytesLengthBetweenCurrentIndexAndInsertIndex + _default_offset) < 0)
+			{
+				_default_offset -= deltaOffset;
+			}else if(_default_offset > 0 && isAfter && (bytesLengthBetweenCurrentIndexAndInsertIndex + getBytesLength()) < _default_offset){
+				_default_offset += deltaOffset;
+			}
+			
+			var length:int = _case_offsets.length;
+			for (var i:int = 0; i < length; ++i) 
+			{
+				var offset:int = _case_offsets[i];
+				if(offset < 0 && !isAfter && (bytesLengthBetweenCurrentIndexAndInsertIndex + offset) < 0)
+				{
+					_case_offsets[i] -= deltaOffset;
+				}else if(offset > 0 && isAfter && (bytesLengthBetweenCurrentIndexAndInsertIndex + getBytesLength()) < offset){
+					_case_offsets[i] += deltaOffset;
+				}
+			}
 		}
 		
 		public function Lookupswitch()
@@ -61,7 +82,7 @@ package decompiler.tags.doabc.instruction
 			_case_offsets = new <int>[];
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_default_offset = SWFUtil.readS24(byte);
 			var case_count:int = SWFUtil.readU30(byte);
@@ -70,7 +91,6 @@ package decompiler.tags.doabc.instruction
 			{
 				_case_offsets[i] = SWFUtil.readS24(byte);
 			}
-			super.decodeFromBytes(byte);
 		}
 		
 		override protected function encodeBody(byte:ByteArray):void

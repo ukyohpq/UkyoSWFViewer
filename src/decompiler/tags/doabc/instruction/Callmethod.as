@@ -74,11 +74,10 @@ package decompiler.tags.doabc.instruction
 			return "callmethod";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_index = SWFUtil.readU32(byte);
 			_arg_count = SWFUtil.readU32(byte);
-			super.decodeFromBytes(byte);
 		}
 		
 		override protected function encodeBody(byte:ByteArray):void

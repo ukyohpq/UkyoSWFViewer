@@ -60,11 +60,12 @@ package decompiler.tags.doabc.instruction
 			return "debugfile";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_index = SWFUtil.readU30(byte);
-			super.decodeFromBytes(byte);
+			super.pcodeDecodeFromBytes(byte);
 		}
+		
 		
 		override public function creatRefrenceRelationship():void
 		{

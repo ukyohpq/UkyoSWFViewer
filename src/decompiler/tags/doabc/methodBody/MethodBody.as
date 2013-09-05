@@ -214,6 +214,10 @@ package decompiler.tags.doabc.methodBody
 			return _methodBodyPCode;
 		}
 
+		public function getPCodeLength():int
+		{
+			return _methodBodyPCode.pcodes.length;
+		}
 		/**
 		 * The value of exception_count is the number of elements in the exception array. 
 		 * The exception array associates exception handlers with ranges of instructions within the code array (see below).
@@ -310,6 +314,14 @@ package decompiler.tags.doabc.methodBody
 		{
 			codeStr.replace(/\r\n/g, "");
 			codeStr.replace(/ */g, " ");
+			
+			var localC:int = 0;
+			var curNumStack:int = 0;
+			var curNumScope:int = 0;
+			var maxSt:int = 0;
+			var maxSc:int = 0;
+			var byteLength:int = 0;
+			
 			var codes:Array = codeStr.split(";");
 			var length:int = codes.length;
 			var opcodes:Array = [];
@@ -332,6 +344,29 @@ package decompiler.tags.doabc.methodBody
 							Lookupswitch(opcode).addCaseOffset(arr[j]);
 						}
 						break;
+					case "declocal":
+					case "declocal_i":
+					case "getlocal":
+					case "setlocal":
+						if(localC < arr[1] + 1)
+							localC = arr[1] + 1;
+					case "getlocal_3":
+					case "setlocal_3":
+						if(localC < 4)
+							localC = 4;
+					case "getlocal_2":
+					case "setlocal_2":
+						if(localC < 3)
+							localC = 3;
+					case "getlocal_1":
+					case "setlocal_1":
+						if(localC < 2)
+							localC = 2;
+					case "getlocal_0":
+					case "setlocal_0":
+						if(localC < 1)
+							localC = 1;
+						break;
 					default:
 						var params:Vector.<String> = opcode.getParamNames();
 						if(params)
@@ -344,9 +379,43 @@ package decompiler.tags.doabc.methodBody
 						}
 						break;
 				}
+				curNumStack += opcode.deltaNumStack();
+				curNumScope += opcode.deltaNumScope();
+				if(maxSt < curNumStack)
+					maxSt = curNumStack;
+				if(maxSc < curNumScope)
+					maxSc = curNumScope;
 				opcodes.push(opcode);
+				byteLength += opcode.getBytesLength();
 			}
-			methodBodyPCode.insertPCode(index, opcodes);
+			if(curNumStack != 0)
+			{
+				trace("这段代码导致栈改变量为:" + curNumStack + "， 可能引起栈不对称");
+			}
+			
+			if(curNumScope != 0)
+			{
+				trace("这段代码导致作用域改变量为:" + curNumStack + "， 可能引起作用域不对称");
+			}
+			//由于有条件分支的情况存在，我这里做的线性检查会不准确，
+			//简单处理，将这段代码计算出的峰值加到原始方法上，
+			//这样虽然会有多，但不会少，不管这段代码放在什么条件分支上，
+			//最终的堆栈总是够用的，并且避免了所有原始pcode也进行逐个检测堆栈改变量的过程
+			_maxScopeDepth += maxSc - _initScopeDepth;
+			_initScopeDepth = 0;
+			_maxStack += maxSt;
+			//寄存器比较特殊，完全由参数决定，不需要计算每个操作码改变堆栈和作用域的值
+			//因此只需要将这段代码用的寄存器和原始方法体的寄存器相比取其较大值就可以了
+			_localCount = (_localCount > localC)?_localCount:localC;
+			
+			var byteIndex:int = methodBodyPCode.getCodeByteLengthBefore(index);
+			length = _exceptionArray.length;
+			for (i = 0; i < length; i++) 
+			{
+				_exceptionArray[i].modifyByInsertPcodes(byteLength, byteIndex);
+			}
+			
+			methodBodyPCode.insertPCode(index, opcodes, byteLength);
 		}
 		
 		override public function toXML(name:String = null):SWFXML
@@ -388,12 +457,12 @@ package decompiler.tags.doabc.methodBody
 			byte.endian = Endian.LITTLE_ENDIAN;
 			SWFUtil.writeU30(byte, _method);
 			
-			var tempBytes:ByteArray = methodBodyPCode.encode();
-			//因为_maxStack这些是methodBodyPCode编译后再决定的，所以，放在后面写入byteArray
 			SWFUtil.writeU30(byte, _maxStack);
 			SWFUtil.writeU30(byte, _localCount);
 			SWFUtil.writeU30(byte, _initScopeDepth);
 			SWFUtil.writeU30(byte, _maxScopeDepth);
+			
+			var tempBytes:ByteArray = methodBodyPCode.encode();
 			byte.writeBytes(tempBytes);
 			tempBytes.clear();
 			

@@ -56,10 +56,9 @@ package decompiler.tags.doabc.instruction
 			return "astype";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
-			index = SWFUtil.readU30(byte);
-			super.decodeFromBytes(byte);
+			_index = SWFUtil.readU30(byte);
 		}
 		
 		override public function creatRefrenceRelationship():void

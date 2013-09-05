@@ -44,7 +44,7 @@ package decompiler.tags.doabc.instruction
 			return "constructsuper";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_arg_count = SWFUtil.readU30(byte);
 		}

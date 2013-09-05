@@ -53,10 +53,9 @@ package decompiler.tags.doabc.instruction
 			return "dxns";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_index = SWFUtil.readU30(byte);
-			super.decodeFromBytes(byte);
 		}
 		
 		override public function creatRefrenceRelationship():void

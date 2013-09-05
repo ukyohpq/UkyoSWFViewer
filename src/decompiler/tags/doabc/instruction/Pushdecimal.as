@@ -1,15 +1,17 @@
 package decompiler.tags.doabc.instruction
 {
-	import flash.utils.ByteArray;
-	
 	import decompiler.utils.SWFUtil;
+	
+	import flash.utils.ByteArray;
 
 	/**
 	 * Undocumented
+	 * VerifyError: Error #1011: 方法 SDFASDFSDF() 包含非法 opcode 51 (偏移量为 6)。
+	 * 没找到，avm2已经不认了
 	 * @author ukyohpq
 	 * 
 	 */
-	public class Pushdecimal extends AbstractInstruction
+	public class Pushdecimal extends UnrecognizedInstruction
 	{
 		private var _index:uint;
 
@@ -30,10 +32,9 @@ package decompiler.tags.doabc.instruction
 			super();
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
-			index = SWFUtil.readU30(byte);
-			super.decodeFromBytes(byte);
+			_index = SWFUtil.readU30(byte);
 		}
 		
 		override protected function encodeBody(byte:ByteArray):void

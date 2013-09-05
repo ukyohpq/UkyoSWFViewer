@@ -111,13 +111,12 @@ package decompiler.tags.doabc.instruction
 			return "debug";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_debug_type = byte.readUnsignedByte();
 			_index = SWFUtil.readU30(byte);
 			_reg = byte.readUnsignedByte();
 			_extra = SWFUtil.readU30(byte);
-			super.decodeFromBytes(byte);
 		}
 		
 		override protected function encodeBody(byte:ByteArray):void

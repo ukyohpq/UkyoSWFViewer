@@ -1,32 +1,48 @@
 package decompiler.tags.doabc.instruction
 {
-	import flash.utils.ByteArray;
-	
 	import decompiler.tags.doabc.ABCFile;
-	
 	import decompiler.utils.SWFUtil;
+	
+	import flash.utils.ByteArray;
 
 	/**
 	 * Undocumented
+	 * III(0x67, L_getouterscope)
+	 * INSTR(getouterscope) {
+  2654                 u1 = U30ARG;  // scope_index
+  2655 				*(++sp) = scope->getScope((uint32_t)u1);
+  2656                 NEXT;
+  2657             }
 	 * @author ukyohpq
 	 * 
 	 */
-	public class Getouterscope extends AbstractInstruction
+	public class Getouterscope extends UndocumentedInstruction
 	{
-		private var index:uint;
+		private var _index:uint;
+
+		public function get index():uint
+		{
+			return _index;
+		}
+
+		public function set index(value:uint):void
+		{
+			_index = value;
+		}
+
 		public function Getouterscope()
 		{
 			super();
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
-			index = SWFUtil.readU30(byte);
+			_index = SWFUtil.readU30(byte);
 		}
 		
 		override protected function encodeBody(byte:ByteArray):void
 		{
-			SWFUtil.writeU30(byte, index);
+			SWFUtil.writeU30(byte, _index);
 		}
 		
 		override public function getForm():int
@@ -46,7 +62,7 @@ package decompiler.tags.doabc.instruction
 		
 		override protected function stringBody():String
 		{
-			return "name:" + $abcFile.getMultinameByIndex(index);
+			return "name:" + $abcFile.getMultinameByIndex(_index);
 		}
 		
 		

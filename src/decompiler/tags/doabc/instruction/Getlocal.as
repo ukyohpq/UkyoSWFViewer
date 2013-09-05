@@ -34,7 +34,7 @@ package decompiler.tags.doabc.instruction
 			super();
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_index = SWFUtil.readU30(byte);
 		}

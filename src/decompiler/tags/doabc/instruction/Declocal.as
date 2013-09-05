@@ -47,11 +47,11 @@ package decompiler.tags.doabc.instruction
 			return "declocal";
 		}
 		
-		override public function decodeFromBytes(byte:ByteArray):void
+		override protected function pcodeDecodeFromBytes(byte:ByteArray):void
 		{
 			_index = SWFUtil.readU30(byte);
-			super.decodeFromBytes(byte);
 		}
+		
 		
 		override protected function encodeBody(byte:ByteArray):void
 		{

@@ -6,7 +6,7 @@ package decompiler.tags.doabc.instruction
 	 * @author ukyohpq
 	 * 
 	 */
-	public class Bkpt extends AbstractInstruction
+	public class Bkpt extends UndocumentedInstruction
 	{
 		public function Bkpt()
 		{
